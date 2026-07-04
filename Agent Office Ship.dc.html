@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<meta name="ext-resource-dependency" content="./uploads/Terrel Andrews Resume 2026.docx" data-resource-id="resumeDocx" />
+<template id="__bundler_thumbnail" data-bg-color="#0B1215">
+  <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="80" fill="#0B1215"/>
+    <circle cx="60" cy="36" r="14" fill="none" stroke="#E8B54A" stroke-width="3"/>
+    <line x1="70" y1="46" x2="80" y2="56" stroke="#E8B54A" stroke-width="3" stroke-linecap="round"/>
+    <text x="60" y="68" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="2" fill="#EDE6D2">CASE 220</text>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B1215;overflow:hidden}
+@keyframes ta-pulse{0%{transform:scale(.9);opacity:.9}70%{transform:scale(2.1);opacity:0}100%{transform:scale(2.1);opacity:0}}
+@keyframes ta-fadeup{from{opacity:0;transform:translateY(26px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes ta-fadein{from{opacity:0}to{opacity:1}}
+@keyframes ta-stamp{0%{opacity:0;transform:scale(1.7) rotate(-7deg)}55%{opacity:1;transform:scale(.94) rotate(-7deg)}100%{opacity:1;transform:scale(1) rotate(-7deg)}}
+@keyframes ta-drift{from{transform:translateY(0)}50%{transform:translateY(-4px)}to{transform:translateY(0)}}
+#ta-scene-wrap{scrollbar-width:none}
+#ta-scene-wrap::-webkit-scrollbar{display:none}
+@media (orientation:portrait){
+#ta-scene-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+#ta-scene{left:0!important;top:0!important;transform:none!important;height:100%!important;width:auto!important;aspect-ratio:1794/1000!important;min-width:100%}
+#ta-coords,#ta-fileno,#ta-stamp{display:none}
+#ta-title{font-size:15px!important;letter-spacing:2px!important}
+#ta-pan-hint{display:block!important}
+}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;font-family:'Courier Prime',monospace;color:#EDE6D2;overflow:hidden">
+
+  <!-- SCENE -->
+  <div id="ta-scene-wrap" ref="{{ sceneWrapRef }}" style="position:absolute;inset:0;z-index:1;overflow:hidden">
+  <div id="ta-scene" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,179.43vh);height:min(100vh,55.73vw)">
+    <img src="office-scene-clean.png" alt="The agent's beach-shack office" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+    <!-- HOTSPOTS (anchored to image coordinates) -->
+    <sc-for list="{{ hotspots }}" as="h" hint-placeholder-count="9">
+      <div style="position:absolute;left:{{ h.x }}%;top:{{ h.y }}%;transform:translate(-50%,-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:7px">
+        <div onClick="{{ h.onOpen }}" role="button" style="position:relative;width:46px;height:46px;cursor:pointer;display:grid;place-items:center;animation:ta-drift 5s ease-in-out infinite" style-hover="animation-play-state:paused">
+          <div style="position:absolute;inset:6px;border-radius:50%;border:2px solid rgba(255,255,255,.85);animation:ta-pulse 2.4s ease-out infinite;display:{{ h.ringDisplay }}"></div>
+          <div style="width:20px;height:20px;border-radius:50%;background:{{ h.dotBg }};border:2px solid rgba(255,255,255,.95);box-shadow:0 2px 12px rgba(0,0,0,.55);display:grid;place-items:center;font-size:12px;font-weight:700;color:#0B1215">{{ h.mark }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  </div>
+
+  <!-- PAN HINT (portrait only) -->
+  <div id="ta-pan-hint" style="display:none;position:absolute;left:50%;bottom:66px;transform:translateX(-50%);z-index:6;font-size:10px;letter-spacing:2px;color:rgba(237,230,210,.9);background:rgba(6,9,11,.65);border:1px solid rgba(237,230,210,.3);border-radius:999px;padding:7px 14px;pointer-events:none;white-space:nowrap">◂ SWIPE TO SEARCH THE ROOM ▸</div>
+
+  <sc-if value="{{ vignetteOn }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 240px rgba(4,8,10,.6)"></div>
+  </sc-if>
+
+  <!-- CASE TAPE EDGES -->
+  <div style="position:absolute;left:0;right:0;top:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:.75;pointer-events:none"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:.75;pointer-events:none"></div>
+
+  <!-- TOP BAR -->
+  <div style="position:absolute;top:5px;left:0;right:0;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 20px;background:linear-gradient(rgba(6,9,11,.8),rgba(6,9,11,0));pointer-events:none;flex-wrap:wrap">
+    <div style="pointer-events:auto;display:flex;gap:18px;align-items:flex-start">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <span style="font-size:10px;letter-spacing:2px;color:rgba(237,230,210,.5);border:1px solid rgba(237,230,210,.35);border-radius:2px;padding:2px 6px">DOSSIER</span>
+          <span id="ta-title" style="font-size:clamp(17px,1.8vw,24px);letter-spacing:4px;font-weight:700;color:#E8B54A;text-shadow:0 2px 12px rgba(0,0,0,.8)">CASE FILE № 220 — <span style="color:#EDE6D2">T. ANDREWS</span></span>
+        </div>
+        <div style="font-size:11.5px;letter-spacing:2px;color:rgba(237,230,210,.85);margin-top:5px;text-shadow:0 1px 6px rgba(0,0,0,.7)">REVOPS &amp; AI SYSTEMS ENGINEER <span style="color:#B0402E">▪</span> STATION: ANTIGUA <span style="color:#B0402E">▪</span> STATUS: <span style="color:#E8B54A">{{ caseStatus }}</span></div>
+        <div style="margin-top:8px;height:2px;width:min(420px,50vw);background:linear-gradient(90deg,#E8B54A,rgba(232,181,74,0))"></div>
+      </div>
+      <div id="ta-stamp" style="border:3px double #B0402E;color:#B0402E;font-size:10px;font-weight:700;letter-spacing:3px;padding:5px 9px;transform:rotate(-7deg);margin-top:6px;text-shadow:none;background:rgba(6,9,11,.35)">EYES ONLY</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;pointer-events:auto">
+      <div style="position:relative">
+        <div onClick="{{ toggleMenu }}" role="button" style="border:1px solid rgba(237,230,210,.4);border-radius:3px;padding:6px 12px;font-size:11px;letter-spacing:2px;background:rgba(6,9,11,.55);backdrop-filter:blur(4px);cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:rgba(237,230,210,.15)">EVIDENCE <span style="color:#E8B54A;font-weight:700">{{ foundCount }}/9</span> <span style="font-size:9px">{{ menuCaret }}</span></div>
+        <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:calc(100% + 8px);width:230px;background:rgba(8,12,14,.94);backdrop-filter:blur(8px);border:1px solid rgba(237,230,210,.3);border-radius:4px;box-shadow:0 16px 44px rgba(0,0,0,.6);padding:6px;animation:ta-fadein .18s ease;z-index:20">
+            <div style="font-size:9.5px;letter-spacing:2.5px;color:rgba(237,230,210,.5);padding:6px 10px 7px;border-bottom:1px solid rgba(237,230,210,.18);margin-bottom:4px">EXHIBIT INDEX</div>
+            <sc-for list="{{ menuItems }}" as="m" hint-placeholder-count="9">
+              <div onClick="{{ m.onPick }}" role="button" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:3px;cursor:pointer;font-size:11px;letter-spacing:2px" style-hover="background:rgba(237,230,210,.12)">
+                <span style="width:14px;text-align:center;color:{{ m.markColor }};font-weight:700">{{ m.mark }}</span>
+                <span>{{ m.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div onClick="{{ toggleMute }}" role="button" style="border:1px solid rgba(237,230,210,.4);border-radius:3px;padding:6px 12px;font-size:11px;letter-spacing:2px;background:rgba(6,9,11,.55);backdrop-filter:blur(4px);cursor:pointer" style-hover="background:rgba(237,230,210,.15)">{{ soundLabel }}</div>
+    </div>
+  </div>
+
+  <!-- FOOTER STRIP -->
+  <div style="position:absolute;left:0;right:0;bottom:5px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 20px 10px;background:linear-gradient(rgba(6,9,11,0),rgba(6,9,11,.82));pointer-events:none;flex-wrap:wrap;font-size:10px;letter-spacing:2px;color:rgba(237,230,210,.65)">
+    <div id="ta-coords" style="text-shadow:0 1px 5px rgba(0,0,0,.7)">17.0747° N, 61.7677° W <span style="color:#B0402E">▪</span> FIELD OFFICE — DO NOT DISTURB</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="color:rgba(237,230,210,.5)">EVIDENCE LOG</span>
+      <div style="display:flex;gap:5px">
+        <sc-for list="{{ evidenceCells }}" as="c" hint-placeholder-count="9">
+          <div style="width:14px;height:9px;border:1px solid rgba(232,181,74,.55);background:{{ c.bg }}"></div>
+        </sc-for>
+      </div>
+      <span style="color:#E8B54A;font-weight:700">{{ foundCount }}/9</span>
+    </div>
+    <div id="ta-fileno" style="text-shadow:0 1px 5px rgba(0,0,0,.7)">FILE NOIR-220 <span style="color:#B0402E">▪</span> {{ footerHint }}</div>
+  </div>
+
+  <!-- BRIEFING CARD -->
+  <sc-if value="{{ showBriefingCard }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:20px;bottom:48px;z-index:7;width:min(330px,86vw);background:#F2ECDA;color:#26241E;border-radius:4px;box-shadow:0 18px 50px rgba(0,0,0,.55);transform:rotate(-1deg);animation:ta-fadeup .5s cubic-bezier(.2,.8,.2,1);padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #26241E;padding-bottom:8px">
+        <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">FIELD BRIEFING</div>
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(38,36,30,.6)">EYES ONLY</div>
+      </div>
+      <p style="font-size:13px;line-height:1.65;margin:12px 0 14px">An operative has gone quiet in the Caribbean. This is his office. Nine objects in this room reveal who he is — open them all to confirm his identity.</p>
+      <div onClick="{{ dismissBriefing }}" role="button" style="display:inline-block;background:#26241E;color:#F2ECDA;font-size:11px;letter-spacing:2px;padding:8px 16px;border-radius:3px;cursor:pointer" style-hover="background:#B0402E">UNDERSTOOD</div>
+    </div>
+  </sc-if>
+
+  <!-- IDENTITY CONFIRMED -->
+  <sc-if value="{{ showDone }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:rgba(6,9,11,.55);backdrop-filter:blur(4px);animation:ta-fadein .3s ease">
+      <div style="background:#F2ECDA;color:#26241E;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.6);padding:44px 48px;text-align:center;width:min(520px,90vw);animation:ta-fadeup .4s cubic-bezier(.2,.8,.2,1);position:relative">
+        <div onClick="{{ dismissDone }}" role="button" style="position:absolute;top:12px;right:14px;font-size:12px;letter-spacing:1px;cursor:pointer;color:rgba(38,36,30,.55)" style-hover="color:#B0402E">✕</div>
+        <div style="display:inline-block;border:4px double #B0402E;color:#B0402E;font-size:26px;font-weight:700;letter-spacing:4px;padding:12px 22px;animation:ta-stamp .5s cubic-bezier(.2,.8,.2,1) both">IDENTITY CONFIRMED</div>
+        <p style="font-size:14px;line-height:1.7;margin:20px 0 6px">Subject: <b>Terrel Andrews</b> — RevOps &amp; AI Systems Engineer. Builds revenue machinery, ships AI agents, solves puzzles for fun.</p>
+        <p style="font-size:12px;color:rgba(38,36,30,.65);margin:0 0 22px">Case closed. Your move.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a href="/cdn-cgi/l/email-protection#3044554242555c54515e544255474370575d51595c1e535f5d" style="background:#26241E;color:#F2ECDA;font-size:11px;letter-spacing:2px;padding:10px 18px;border-radius:3px;text-decoration:none" style-hover="background:#B0402E">EMAIL THE AGENT</a>
+          <a href="https://www.linkedin.com/in/terrel-andrews/" target="_blank" rel="noopener" style="border:2px solid #26241E;color:#26241E;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:3px;text-decoration:none" style-hover="border-color:#B0402E;color:#B0402E">LINKEDIN</a>
+          <div onClick="{{ resetCase }}" role="button" style="color:rgba(38,36,30,.55);font-size:11px;letter-spacing:2px;padding:10px 6px;cursor:pointer;text-decoration:underline" style-hover="color:#B0402E">RESET CASE</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- PANEL OVERLAY -->
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:absolute;inset:0;z-index:10;background:rgba(6,9,11,.62);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;animation:ta-fadein .22s ease">
+      <div onClick="{{ stopProp }}" style="width:min(780px,94vw);max-height:86vh;overflow:auto;background:#F2ECDA;color:#26241E;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:ta-fadeup .35s cubic-bezier(.2,.8,.2,1);position:relative">
+        <div onClick="{{ close }}" role="button" style="position:sticky;top:0;float:right;margin:14px 16px 0 0;background:#26241E;color:#F2ECDA;font-size:11px;letter-spacing:2px;padding:7px 13px;border-radius:3px;cursor:pointer;z-index:2" style-hover="background:#B0402E">✕ CLOSE</div>
+
+        <!-- JOURNAL / RESUME -->
+        <sc-if value="{{ isJournal }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT B — THE JOURNAL</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">SERVICE RECORD</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 18px"></div>
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline">
+              <div>
+                <div style="font-size:20px;font-weight:700;letter-spacing:2px">TERREL ANDREWS</div>
+                <div style="font-size:12px;letter-spacing:2px;color:#B0402E;font-weight:700">REVOPS &amp; AI SYSTEMS ENGINEER</div>
+              </div>
+              <a href="{{ resumeHref }}" download="Terrel Andrews Resume 2026.docx" style="background:#26241E;color:#F2ECDA;font-size:11px;letter-spacing:2px;padding:9px 16px;border-radius:3px;text-decoration:none" style-hover="background:#B0402E">DOWNLOAD RESUME ↓</a>
+            </div>
+            <p style="font-size:13.5px;line-height:1.7;margin:16px 0">Director-level Revenue Operations &amp; AI systems leader with 8+ years building the machinery behind revenue: CRM architecture, marketing automation at enterprise scale, and custom AI agents that remove human bottlenecks. Led full-platform migrations, owns a $1M Martech budget, and ships tooling that QAs, filters, routes — and makes calls.</p>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid rgba(38,36,30,.3);padding-bottom:5px">KEY ACHIEVEMENTS</div>
+            <div style="display:grid;gap:9px;font-size:13px;line-height:1.6">
+              <div style="display:flex;gap:10px"><span style="color:#B0402E;font-weight:700">▸</span><span>Led full migration to Salesforce Marketing Cloud at Goldco — enterprise-scale automation supporting billion-dollar revenue operations.</span></div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E;font-weight:700">▸</span><span>Owns and optimized a $1M annual Martech budget — renegotiated vendor contracts, consolidated tools, improved performance.</span></div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E;font-weight:700">▸</span><span>Built the executive reporting framework in Domo + Salesforce that shapes revenue strategy and forecasting.</span></div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E;font-weight:700">▸</span><span>Standardized automation &amp; CRM process across multiple organizations — campaign efficiency, lead conversion, cross-team alignment.</span></div>
+            </div>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:22px 0 10px;border-bottom:1px solid rgba(38,36,30,.3);padding-bottom:5px">POSTINGS</div>
+            <div style="display:grid;gap:16px;font-size:13px;line-height:1.6">
+              <div>
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>SR. MARKETING AUTOMATION MANAGER — Goldco</b><span style="color:rgba(38,36,30,.6)">May 2021 – Present</span></div>
+                <div style="margin-top:4px">Directed the SFMC migration end-to-end. Manages the $1M Martech budget. Leads Marketing × Sales × IT alignment on lead gen and nurture. Governs the stack — Salesforce, HubSpot, Zapier, GTM, custom builds.</div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>MARTECH CONTRACTOR — LAIRE Digital</b><span style="color:rgba(38,36,30,.6)">May 2021 – Jun 2022</span></div>
+                <div style="margin-top:4px">Advised client leadership on Martech strategy, CRM adoption and automation; designed scalable HubSpot/Salesforce/Zapier processes; ran training and change management.</div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>MARTECH SPECIALIST — LAIRE Digital</b><span style="color:rgba(38,36,30,.6)">Jul 2020 – May 2021</span></div>
+                <div style="margin-top:4px">Implemented HubSpot and Salesforce automation frameworks; led cross-channel integration projects for campaign and journey tracking.</div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>EARLY CAREER — Intelichart · Ironpaper</b><span style="color:rgba(38,36,30,.6)">2017 – 2020</span></div>
+                <div style="margin-top:4px">CRM migrations, Salesforce dashboards, multi-channel campaigns in HubSpot and Mailchimp, pipeline visibility with sales leadership.</div>
+              </div>
+            </div>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:22px 0 8px;border-bottom:1px solid rgba(38,36,30,.3);padding-bottom:5px">TRAINING</div>
+            <div style="font-size:13px">B.S. Business Administration, Marketing — University of North Carolina at Charlotte</div>
+          </div>
+        </sc-if>
+
+        <!-- LAPTOP / PORTFOLIO -->
+        <sc-if value="{{ isLaptop }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT C — THE COMPUTER</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">FIELD OPERATIONS</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 18px"></div>
+            <div style="background:#0E1B14;border-radius:6px;padding:22px 24px;color:#BFE8C4;box-shadow:inset 0 0 40px rgba(0,0,0,.5)">
+              <div style="font-size:12px;letter-spacing:1px;color:#6FCF7E;margin-bottom:18px">&gt; decrypting case files… 5 found_</div>
+              <div style="display:grid;gap:18px">
+                <div style="border:1px solid rgba(111,207,126,.3);border-radius:4px;padding:16px 18px">
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:baseline"><div style="font-size:15px;font-weight:700;color:#EAF6E8">01 · LANDING PAGE QC TOOL</div><div style="font-size:11px;color:#6FCF7E;letter-spacing:1px">AI · CLAUDE · UNBOUNCE API</div></div>
+                  <p style="font-size:12.5px;line-height:1.7;margin:8px 0 0;color:rgba(234,246,232,.85)">An AI agent that audits landing pages end-to-end: scrapes Unbounce back-ends via API, validates consent language, form field names, webhooks, pixel placement and favicon; submits a live test lead via JS and confirms a 200 webhook response; runs a Google PageSpeed check; logs pass/fail to Google Sheets via Apps Script.</p>
+                  <div style="margin-top:10px;font-size:12px;color:#E8B54A;letter-spacing:1px">▮ FULL PAGE AUDIT IN UNDER 20 SECONDS</div>
+                </div>
+                <div style="border:1px solid rgba(111,207,126,.3);border-radius:4px;padding:16px 18px">
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:baseline"><div style="font-size:15px;font-weight:700;color:#EAF6E8">02 · AI OUTBOUND VOICE AGENT</div><div style="font-size:11px;color:#6FCF7E;letter-spacing:1px">AI · VOICE · SALES OPS</div></div>
+                  <p style="font-size:12.5px;line-height:1.7;margin:8px 0 0;color:rgba(234,246,232,.85)">Call data showed 85% of connections happen within the first 5 attempts. Deployed an AI voice agent to work attempts 6–10, freeing reps for high-probability outreach.</p>
+                  <div style="margin-top:10px;font-size:12px;color:#E8B54A;letter-spacing:1px">▮ FREED ~50% OF SALES ORG CAPACITY — VOLUME, CONNECTS &amp; REVENUE HELD</div>
+                </div>
+                <div style="border:1px solid rgba(111,207,126,.3);border-radius:4px;padding:16px 18px">
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:baseline"><div style="font-size:15px;font-weight:700;color:#EAF6E8">03 · QA FORM-FILL CHROME EXTENSION</div><div style="font-size:11px;color:#6FCF7E;letter-spacing:1px">JS · SALESFORCE</div></div>
+                  <p style="font-size:12.5px;line-height:1.7;margin:8px 0 0;color:rgba(234,246,232,.85)">Auto-fills and submits test forms across landing pages, then verifies each lead record lands correctly in Salesforce — replacing a manual, high-volume QA process.</p>
+                </div>
+                <div style="border:1px solid rgba(111,207,126,.3);border-radius:4px;padding:16px 18px">
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:baseline"><div style="font-size:15px;font-weight:700;color:#EAF6E8">04 · LEAD FILTERING SYSTEM</div><div style="font-size:11px;color:#6FCF7E;letter-spacing:1px">DATA INTEGRITY</div></div>
+                  <p style="font-size:12.5px;line-height:1.7;margin:8px 0 0;color:rgba(234,246,232,.85)">Filters and qualifies leads before they ever hit Salesforce — protecting data integrity at the system-of-record level.</p>
+                </div>
+                <div style="border:1px solid rgba(111,207,126,.3);border-radius:4px;padding:16px 18px">
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:baseline"><div style="font-size:15px;font-weight:700;color:#EAF6E8">05 · LEAD ROUTING REDESIGN</div><div style="font-size:11px;color:#6FCF7E;letter-spacing:1px">REVOPS STRATEGY</div></div>
+                  <p style="font-size:12.5px;line-height:1.7;margin:8px 0 0;color:rgba(234,246,232,.85)">Eliminated lead scoring in favor of smarter routing — the best leads go to the most qualified reps based on fit and behavior, not a score.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PHONE / CONTACT -->
+        <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 40px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT D — THE PHONE</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">SECURE LINE</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 20px"></div>
+            <p style="font-size:13.5px;line-height:1.7;margin:0 0 22px">The line is open. He actually answers.</p>
+            <div style="display:grid;gap:12px;max-width:420px">
+              <a href="/cdn-cgi/l/email-protection#5226372020373e36333c362037252112353f333b3e7c313d3f" style="display:flex;justify-content:space-between;align-items:center;background:#26241E;color:#F2ECDA;text-decoration:none;padding:16px 20px;border-radius:4px;transition:background .15s" style-hover="background:#B0402E"><span style="font-size:11px;letter-spacing:2px">EMAIL</span><span style="font-size:13.5px;font-weight:700"><span class="__cf_email__" data-cfemail="6511001717000901040b0117001216250208040c094b060a08">[email&#160;protected]</span></span></a>
+              <a href="https://www.linkedin.com/in/terrel-andrews/" target="_blank" rel="noopener" style="display:flex;justify-content:space-between;align-items:center;border:2px solid #26241E;color:#26241E;text-decoration:none;padding:14px 20px;border-radius:4px;transition:all .15s" style-hover="border-color:#B0402E;color:#B0402E"><span style="font-size:11px;letter-spacing:2px">LINKEDIN</span><span style="font-size:13.5px;font-weight:700">/in/terrel-andrews</span></a>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- WINDOW / ANTIGUA -->
+        <sc-if value="{{ isWindow }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT A — THE VIEW</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">STATION: ANTIGUA &amp; BARBUDA</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 18px"></div>
+            <img src="window-view.png" alt="The view from the office window" style="width:100%;height:300px;object-fit:cover;border-radius:6px;display:block">
+            <p style="font-size:13.5px;line-height:1.7;margin:16px 0 0">365 beaches — one for every day of the year. This is the view the agent chose when he "retired." The laptop on the desk suggests otherwise.</p>
+          </div>
+        </sc-if>
+
+        <!-- BOARD / TECH STACK -->
+        <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT E — THE BOARD</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">THE NETWORK</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 6px"></div>
+            <p style="font-size:12.5px;color:rgba(38,36,30,.65);margin:8px 0 18px">Every system he runs, and how they connect.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+              <div style="background:#FBF7EA;border:1px solid rgba(38,36,30,.25);padding:16px;transform:rotate(-.6deg);box-shadow:0 4px 10px rgba(0,0,0,.12);position:relative"><div style="position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:#B0402E;transform:translateX(-50%);box-shadow:0 2px 3px rgba(0,0,0,.3)"></div>
+                <div style="font-size:11px;letter-spacing:2px;font-weight:700;color:#B0402E;margin-bottom:8px">SYSTEM OF RECORD</div>
+                <div style="font-size:13px;line-height:1.9">Salesforce<br>HubSpot · Marketo</div>
+              </div>
+              <div style="background:#FBF7EA;border:1px solid rgba(38,36,30,.25);padding:16px;transform:rotate(.7deg);box-shadow:0 4px 10px rgba(0,0,0,.12);position:relative"><div style="position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:#B0402E;transform:translateX(-50%);box-shadow:0 2px 3px rgba(0,0,0,.3)"></div>
+                <div style="font-size:11px;letter-spacing:2px;font-weight:700;color:#B0402E;margin-bottom:8px">AUTOMATION</div>
+                <div style="font-size:13px;line-height:1.9">Salesforce Marketing Cloud<br>Marketo · HubSpot · Zapier</div>
+              </div>
+              <div style="background:#FBF7EA;border:1px solid rgba(38,36,30,.25);padding:16px;transform:rotate(.5deg);box-shadow:0 4px 10px rgba(0,0,0,.12);position:relative"><div style="position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:#B0402E;transform:translateX(-50%);box-shadow:0 2px 3px rgba(0,0,0,.3)"></div>
+                <div style="font-size:11px;letter-spacing:2px;font-weight:700;color:#B0402E;margin-bottom:8px">INTELLIGENCE</div>
+                <div style="font-size:13px;line-height:1.9">Domo · Google Analytics<br>GTM</div>
+              </div>
+              <div style="background:#FBF7EA;border:1px solid rgba(38,36,30,.25);padding:16px;transform:rotate(-.8deg);box-shadow:0 4px 10px rgba(0,0,0,.12);position:relative"><div style="position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:#B0402E;transform:translateX(-50%);box-shadow:0 2px 3px rgba(0,0,0,.3)"></div>
+                <div style="font-size:11px;letter-spacing:2px;font-weight:700;color:#B0402E;margin-bottom:8px">AI FIELD KIT</div>
+                <div style="font-size:13px;line-height:1.9">Claude · AI voice agents<br>JavaScript · Node.js · Python<br>APIs · GitHub · Apps Script</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SHELF / CERTS -->
+        <sc-if value="{{ isShelf }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT F — THE BOOKSHELF</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">CREDENTIALS</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 18px"></div>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:0 0 10px">CERTIFICATIONS</div>
+            <div style="display:grid;gap:8px;font-size:13px;line-height:1.6">
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>HubSpot — Inbound Sales · Inbound Marketing · Marketing Software · Sales Software</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Google Analytics</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Salesforce Trailhead — Ranger status</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Salesforce Administrator — in progress</div>
+            </div>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:22px 0 12px">FIELD SKILLS</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">CRM migration</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">$1M Martech budget ownership</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Lifecycle automation</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Lead routing &amp; filtering</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Executive reporting</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Vendor negotiation</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Change management</div>
+              <div style="border:1.5px solid #26241E;border-radius:999px;padding:6px 14px;font-size:12px">Cross-functional leadership</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PHOTOS / PERSONAL -->
+        <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 34px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT G — THE PHOTOS</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">KNOWN ASSOCIATES &amp; TRAITS</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 18px"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px">
+              <div style="background:#FBF7EA;padding:10px 10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.15);transform:rotate(-1deg)">
+                <div style="width:100%;height:auto;aspect-ratio:4/3;display:grid;place-items:center;background:repeating-linear-gradient(-45deg,#E7E0CC 0 10px,#EFE9D8 10px 20px);border:1px solid rgba(38,36,30,.2)"><div style="border:3px double #B0402E;color:#B0402E;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 9px;transform:rotate(-6deg)">CLASSIFIED</div></div>
+                <div style="font-size:11.5px;margin-top:8px;line-height:1.5">The household unit — wife + two junior operatives.</div>
+              </div>
+              <div style="background:#FBF7EA;padding:10px 10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.15);transform:rotate(1deg)">
+                <div style="width:100%;height:auto;aspect-ratio:4/3;display:grid;place-items:center;background:repeating-linear-gradient(-45deg,#E7E0CC 0 10px,#EFE9D8 10px 20px);border:1px solid rgba(38,36,30,.2)"><div style="border:3px double #B0402E;color:#B0402E;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 9px;transform:rotate(-6deg)">CLASSIFIED</div></div>
+                <div style="font-size:11.5px;margin-top:8px;line-height:1.5">Allegiance: Pittsburgh Steelers. Non-negotiable.</div>
+              </div>
+              <div style="background:#FBF7EA;padding:10px 10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.15);transform:rotate(.6deg)">
+                <div style="width:100%;height:auto;aspect-ratio:4/3;display:grid;place-items:center;background:repeating-linear-gradient(-45deg,#E7E0CC 0 10px,#EFE9D8 10px 20px);border:1px solid rgba(38,36,30,.2)"><div style="border:3px double #B0402E;color:#B0402E;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 9px;transform:rotate(-6deg)">CLASSIFIED</div></div>
+                <div style="font-size:11.5px;margin-top:8px;line-height:1.5">Origin: Pittsburgh, PA.</div>
+              </div>
+              <div style="background:#FBF7EA;padding:10px 10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.15);transform:rotate(-.8deg)">
+                <div style="width:100%;height:auto;aspect-ratio:4/3;display:grid;place-items:center;background:repeating-linear-gradient(-45deg,#E7E0CC 0 10px,#EFE9D8 10px 20px);border:1px solid rgba(38,36,30,.2)"><div style="border:3px double #B0402E;color:#B0402E;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 9px;transform:rotate(-6deg)">CLASSIFIED</div></div>
+                <div style="font-size:11.5px;margin-top:8px;line-height:1.5">Latest build. He works with his hands.</div>
+              </div>
+            </div>
+            <div style="font-size:12px;letter-spacing:3px;font-weight:700;margin:22px 0 10px">FIELD NOTES</div>
+            <div style="display:grid;gap:8px;font-size:13px;line-height:1.6">
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Escape rooms and complex lock boxes — he solves puzzles for sport. (You're inside one of his right now.)</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Builds with his hands: LEGO, projects, whatever needs assembling.</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Keeps plants. All alive, allegedly.</div>
+              <div style="display:flex;gap:10px"><span style="color:#B0402E">▸</span>Trained at UNC Charlotte. Self-described renaissance man — many seemingly unconnected interests, one very connected brain.</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- RADIO -->
+        <sc-if value="{{ isRadio }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 40px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT H — THE RADIO</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">FREQ 94.7 — THE AGENT'S FREQUENCY</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 20px"></div>
+            <div style="background:#26241E;color:#E8B54A;border-radius:4px;padding:18px 20px;font-size:13px;letter-spacing:1px;line-height:1.8">TRANSMISSION INTERCEPTED…<br><span style="color:rgba(232,181,74,.55)">▂▄▆▂▁▅▃▇▂▄▁▆▃▂▅▁</span><br>Mostly static. The playlist remains classified.</div>
+            <p style="font-size:13.5px;line-height:1.7;margin:16px 0 0">The dial never stays on one station — neither does he. Ask him what's playing; the man has range.</p>
+          </div>
+        </sc-if>
+
+        <!-- MUG -->
+        <sc-if value="{{ isMug }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 30px 40px">
+            <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">EXHIBIT I — THE MUG</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:1px;margin-top:4px">STANDARD ISSUE</div>
+            <div style="border-bottom:2px solid #26241E;margin:12px 0 20px"></div>
+            <div style="display:inline-block;border:4px double #B0402E;color:#B0402E;font-size:20px;font-weight:700;letter-spacing:3px;padding:10px 18px;transform:rotate(-3deg)">#1 DAD</div>
+            <p style="font-size:13.5px;line-height:1.7;margin:18px 0 0">Issued by the two junior operatives at home. Evidence suggests the coffee rarely survives to lukewarm — there's always another mission (usually the school run).</p>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script data-props="{&quot;showBriefing&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;},&quot;vignette&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;}}">
+class Component extends DCLogic {
+  state = { openId: null, found: [], muted: false, briefingDismissed: false, doneDismissed: false, menuOpen: false };
+  _wrapRef = React.createRef();
+
+  componentDidMount() {
+    try {
+      const f = JSON.parse(localStorage.getItem('ta-office-found') || '[]');
+      const b = localStorage.getItem('ta-office-briefing') === '1';
+      this.setState({ found: Array.isArray(f) ? f : [], briefingDismissed: b });
+    } catch (e) {}
+    this._onScenePan = () => {
+      const h = document.getElementById('ta-pan-hint');
+      if (h) { h.style.transition = 'opacity .4s'; h.style.opacity = '0'; }
+      const w = this._wrapRef.current;
+      if (w) w.removeEventListener('scroll', this._onScenePan);
+    };
+    this._centerScene = () => {
+      const w = this._wrapRef.current;
+      if (w && w.scrollWidth > w.clientWidth + 4) {
+        w.scrollLeft = w.scrollWidth * 0.55 - w.clientWidth / 2;
+        setTimeout(() => w.addEventListener('scroll', this._onScenePan, { passive: true }), 400);
+      }
+    };
+    requestAnimationFrame(() => this._centerScene());
+    this._mq = window.matchMedia('(orientation: portrait)');
+    this._onOrient = () => requestAnimationFrame(() => this._centerScene());
+    if (this._mq.addEventListener) this._mq.addEventListener('change', this._onOrient);
+    this._onKey = (e) => { if (e.key === 'Escape') { this.close(); this.setState({ menuOpen: false }); } };
+    window.addEventListener('keydown', this._onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKey);
+    if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener('change', this._onOrient);
+  }
+
+  beep(f1, f2) {
+    if (this.state.muted) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      const ctx = this._ctx || (this._ctx = new Ctx());
+      if (ctx.state === 'suspended') ctx.resume();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f1, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + 0.15);
+      g.gain.setValueAtTime(0.07, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime + 0.2);
+    } catch (e) {}
+  }
+
+  open(id) {
+    this.setState((s) => {
+      const found = s.found.includes(id) ? s.found : [...s.found, id];
+      try { localStorage.setItem('ta-office-found', JSON.stringify(found)); } catch (e) {}
+      return { openId: id, found, menuOpen: false };
+    });
+    this.beep(620, 880);
+  }
+  close() { if (this.state.openId) { this.setState({ openId: null }); this.beep(500, 340); } }
+
+  renderVals() {
+    const DEFS = [
+      { id: 'window', label: 'THE WINDOW', x: 60, y: 36 },
+      { id: 'photos', label: 'THE PHOTOS', x: 81.5, y: 33 },
+      { id: 'board',  label: 'THE BOARD',  x: 19.5, y: 38 },
+      { id: 'shelf',  label: 'THE BOOKSHELF', x: 5.5, y: 54 },
+      { id: 'laptop', label: 'THE COMPUTER', x: 58, y: 64 },
+      { id: 'journal',label: 'THE JOURNAL', x: 42.5, y: 69 },
+      { id: 'mug',    label: 'THE MUG',    x: 82.5, y: 74 },
+      { id: 'phone',  label: 'THE PHONE',  x: 68.5, y: 74.5 },
+      { id: 'radio',  label: 'THE RADIO',  x: 76, y: 65 }
+    ];
+    const found = this.state.found;
+    const openId = this.state.openId;
+    const hotspots = DEFS.map((d) => {
+      const isFound = found.includes(d.id);
+      return Object.assign({}, d, {
+        mark: isFound ? '✓' : '',
+        ringDisplay: isFound ? 'none' : 'block',
+        dotBg: isFound ? '#E8B54A' : 'rgba(255,255,255,.95)',
+        onOpen: () => this.open(d.id)
+      });
+    });
+    const menuItems = DEFS.map((d) => {
+      const isFound = found.includes(d.id);
+      return {
+        label: d.label,
+        mark: isFound ? '✓' : '·',
+        markColor: isFound ? '#E8B54A' : 'rgba(237,230,210,.45)',
+        onPick: () => this.open(d.id)
+      };
+    });
+    const allFound = found.length >= DEFS.length;
+    const showBriefingProp = this.props.showBriefing ?? true;
+    return {
+      hotspots,
+      sceneWrapRef: this._wrapRef,
+      evidenceCells: DEFS.map((d) => ({ bg: found.includes(d.id) ? '#E8B54A' : 'transparent' })),
+      caseStatus: allFound ? 'IDENTITY CONFIRMED' : 'ACTIVE INVESTIGATION',
+      footerHint: allFound ? 'CASE CLOSED' : 'CLICK A MARKER TO EXAMINE',
+      menuItems,
+      menuOpen: this.state.menuOpen,
+      menuCaret: this.state.menuOpen ? '▲' : '▼',
+      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
+      foundCount: found.length,
+      resumeHref: (window.__resources && window.__resources.resumeDocx) || 'uploads/Terrel Andrews Resume 2026.docx',
+      panelOpen: !!openId,
+      isJournal: openId === 'journal',
+      isLaptop: openId === 'laptop',
+      isPhone: openId === 'phone',
+      isWindow: openId === 'window',
+      isBoard: openId === 'board',
+      isShelf: openId === 'shelf',
+      isPhotos: openId === 'photos',
+      isRadio: openId === 'radio',
+      isMug: openId === 'mug',
+      showBriefingCard: showBriefingProp && !this.state.briefingDismissed && !openId && !allFound,
+      showDone: allFound && !openId && !this.state.doneDismissed,
+      vignetteOn: this.props.vignette ?? true,
+      soundLabel: this.state.muted ? 'SOUND OFF' : 'SOUND ON',
+      close: () => this.close(),
+      stopProp: (e) => e.stopPropagation(),
+      toggleMute: () => this.setState((s) => ({ muted: !s.muted })),
+      dismissBriefing: () => {
+        try { localStorage.setItem('ta-office-briefing', '1'); } catch (e) {}
+        this.setState({ briefingDismissed: true });
+        this.beep(700, 900);
+      },
+      dismissDone: () => this.setState({ doneDismissed: true }),
+      resetCase: () => {
+        try { localStorage.setItem('ta-office-found', '[]'); localStorage.setItem('ta-office-briefing', ''); } catch (e) {}
+        this.setState({ found: [], doneDismissed: false, briefingDismissed: false, openId: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
