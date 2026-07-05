@@ -26,6 +26,19 @@ body{margin:0;background:#0B1215;overflow:hidden}
 @keyframes ta-fadein{from{opacity:0}to{opacity:1}}
 @keyframes ta-stamp{0%{opacity:0;transform:scale(1.7) rotate(-7deg)}55%{opacity:1;transform:scale(.94) rotate(-7deg)}100%{opacity:1;transform:scale(1) rotate(-7deg)}}
 @keyframes ta-drift{from{transform:translateY(0)}50%{transform:translateY(-4px)}to{transform:translateY(0)}}
+@keyframes ta-drift2{from{transform:translateY(0)}50%{transform:translateY(-7px)}to{transform:translateY(0)}}
+@keyframes ta-ripple{from{transform:scale(.6);opacity:.9}to{transform:scale(2.5);opacity:0}}
+.ta-node>div:last-child{transition:box-shadow .25s ease,transform .25s ease}
+.ta-node:hover>div:last-child{box-shadow:0 0 18px rgba(232,181,74,.85),0 2px 12px rgba(0,0,0,.55);transform:scale(1.12)}
+.ta-panel>div>*{animation:ta-fadeup .45s cubic-bezier(.2,.8,.2,1) both}
+.ta-panel>div>:nth-child(1){animation-delay:.05s}
+.ta-panel>div>:nth-child(2){animation-delay:.13s}
+.ta-panel>div>:nth-child(3){animation-delay:.21s}
+.ta-panel>div>:nth-child(n+4){animation-delay:.29s}
+@media (prefers-reduced-motion:reduce){
+.ta-panel>div>*{animation:none!important}
+#ta-camera{transition:none!important}
+}
 #ta-scene-wrap{scrollbar-width:none}
 #ta-scene-wrap::-webkit-scrollbar{display:none}
 @media (orientation:portrait){
@@ -42,16 +55,19 @@ body{margin:0;background:#0B1215;overflow:hidden}
   <!-- SCENE -->
   <div id="ta-scene-wrap" ref="{{ sceneWrapRef }}" style="position:absolute;inset:0;z-index:1;overflow:hidden">
   <div id="ta-scene" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,179.43vh);height:min(100vh,55.73vw)">
+  <div id="ta-camera" style="position:absolute;inset:0;will-change:transform;transform-origin:{{ camOrigin }};transform:{{ camTransform }};transition:{{ camTransition }}">
     <img src="office-scene-clean.png" alt="The agent's beach-shack office" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
     <!-- HOTSPOTS (anchored to image coordinates) -->
     <sc-for list="{{ hotspots }}" as="h" hint-placeholder-count="9">
-      <div style="position:absolute;left:{{ h.x }}%;top:{{ h.y }}%;transform:translate(-50%,-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:7px">
-        <div onClick="{{ h.onOpen }}" role="button" style="position:relative;width:46px;height:46px;cursor:pointer;display:grid;place-items:center;animation:ta-drift 5s ease-in-out infinite" style-hover="animation-play-state:paused">
+      <div style="position:absolute;left:{{ h.x }}%;top:{{ h.y }}%;transform:{{ h.nodeTransform }};transition:transform .68s cubic-bezier(.22,.85,.3,1.06);z-index:5;display:flex;flex-direction:column;align-items:center;gap:7px">
+        <div onClick="{{ h.onOpen }}" role="button" class="ta-node" style="position:relative;width:46px;height:46px;cursor:pointer;display:grid;place-items:center;animation:{{ h.driftAnim }}" style-hover="animation-play-state:paused">
           <div style="position:absolute;inset:6px;border-radius:50%;border:2px solid rgba(255,255,255,.85);animation:ta-pulse 2.4s ease-out infinite;display:{{ h.ringDisplay }}"></div>
+          <div style="position:absolute;inset:2px;border-radius:50%;border:2px solid rgba(232,181,74,.9);pointer-events:none;animation:ta-ripple .7s ease-out both;display:{{ h.rippleDisplay }}"></div>
           <div style="width:20px;height:20px;border-radius:50%;background:{{ h.dotBg }};border:2px solid rgba(255,255,255,.95);box-shadow:0 2px 12px rgba(0,0,0,.55);display:grid;place-items:center;font-size:12px;font-weight:700;color:#0B1215">{{ h.mark }}</div>
         </div>
       </div>
     </sc-for>
+  </div>
   </div>
   </div>
 
@@ -144,8 +160,8 @@ body{margin:0;background:#0B1215;overflow:hidden}
 
   <!-- PANEL OVERLAY -->
   <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ close }}" style="position:absolute;inset:0;z-index:10;background:rgba(6,9,11,.62);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;animation:ta-fadein .22s ease">
-      <div onClick="{{ stopProp }}" style="width:min(780px,94vw);max-height:86vh;overflow:auto;background:#F2ECDA;color:#26241E;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:ta-fadeup .35s cubic-bezier(.2,.8,.2,1);position:relative">
+    <div onClick="{{ close }}" style="position:absolute;inset:0;z-index:10;background:rgba(6,9,11,.62);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;animation:ta-fadein .22s ease;opacity:{{ panelOpacity }};transition:opacity .22s ease">
+      <div onClick="{{ stopProp }}" class="ta-panel" style="width:min(780px,94vw);max-height:86vh;overflow:auto;background:#F2ECDA;color:#26241E;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:ta-fadeup .35s cubic-bezier(.2,.8,.2,1);position:relative">
         <div onClick="{{ close }}" role="button" style="position:sticky;top:0;float:right;margin:14px 16px 0 0;background:#26241E;color:#F2ECDA;font-size:11px;letter-spacing:2px;padding:7px 13px;border-radius:3px;cursor:pointer;z-index:2" style-hover="background:#B0402E">✕ CLOSE</div>
 
         <!-- JOURNAL / RESUME -->
@@ -372,7 +388,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
 </x-dc>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script data-props="{&quot;showBriefing&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;},&quot;vignette&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;}}">
 class Component extends DCLogic {
-  state = { openId: null, found: [], muted: false, briefingDismissed: false, doneDismissed: false, menuOpen: false };
+  state = { openId: null, camTarget: null, camZoom: false, closing: false, found: [], muted: false, briefingDismissed: false, doneDismissed: false, menuOpen: false };
   _wrapRef = React.createRef();
 
   componentDidMount() {
@@ -402,6 +418,7 @@ class Component extends DCLogic {
     window.addEventListener('keydown', this._onKey);
   }
   componentWillUnmount() {
+    this.clearCamTimers();
     window.removeEventListener('keydown', this._onKey);
     if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener('change', this._onOrient);
   }
@@ -423,15 +440,44 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
+  cinematic() {
+    try {
+      return window.matchMedia('(orientation: landscape)').matches &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { return true; }
+  }
+  clearCamTimers() { clearTimeout(this._camT1); clearTimeout(this._camT2); }
+
   open(id) {
+    this.clearCamTimers();
+    const fly = this.cinematic();
     this.setState((s) => {
       const found = s.found.includes(id) ? s.found : [...s.found, id];
       try { localStorage.setItem('ta-office-found', JSON.stringify(found)); } catch (e) {}
-      return { openId: id, found, menuOpen: false };
+      return fly
+        ? { camTarget: id, camZoom: true, closing: false, found, menuOpen: false }
+        : { openId: id, camTarget: null, camZoom: false, closing: false, found, menuOpen: false };
     });
     this.beep(620, 880);
+    if (fly) this._camT1 = setTimeout(() => this.setState({ openId: id }), 700);
   }
-  close() { if (this.state.openId) { this.setState({ openId: null }); this.beep(500, 340); } }
+  close() {
+    if ((!this.state.openId && !this.state.camZoom) || this.state.closing) return;
+    this.beep(500, 340);
+    if (!this.cinematic()) { this.setState({ openId: null, camTarget: null, camZoom: false }); return; }
+    this.clearCamTimers();
+    if (!this.state.openId) {
+      // Escape mid-fly: no panel yet, just glide back to the overview.
+      this.setState({ camZoom: false });
+      this._camT2 = setTimeout(() => this.setState({ camTarget: null }), 650);
+      return;
+    }
+    this.setState({ closing: true });
+    this._camT1 = setTimeout(() => {
+      this.setState({ openId: null, closing: false, camZoom: false });
+      this._camT2 = setTimeout(() => this.setState({ camTarget: null }), 650);
+    }, 220);
+  }
 
   renderVals() {
     const DEFS = [
@@ -447,12 +493,27 @@ class Component extends DCLogic {
     ];
     const found = this.state.found;
     const openId = this.state.openId;
-    const hotspots = DEFS.map((d) => {
+    const cam = this.state.camTarget ? DEFS.find((d) => d.id === this.state.camTarget) : null;
+    const zoomed = !!cam && this.state.camZoom;
+    const hotspots = DEFS.map((d, i) => {
       const isFound = found.includes(d.id);
+      const driftAnim = (i % 2 ? 'ta-drift2 ' : 'ta-drift ') + (4.5 + (i * 0.73) % 2).toFixed(2) + 's ease-in-out ' + (-(i * 1.1)).toFixed(1) + 's infinite';
+      let nodeTransform = 'translate(-50%,-50%)';
+      if (zoomed) {
+        if (d.id === cam.id) {
+          nodeTransform += ' scale(1.18)';
+        } else {
+          const vx = d.x - cam.x, vy = d.y - cam.y, len = Math.hypot(vx, vy) || 1;
+          nodeTransform += ' translate(' + (vx / len * 16).toFixed(1) + 'px,' + (vy / len * 16).toFixed(1) + 'px)';
+        }
+      }
       return Object.assign({}, d, {
         mark: isFound ? '✓' : '',
         ringDisplay: isFound ? 'none' : 'block',
         dotBg: isFound ? '#E8B54A' : 'rgba(255,255,255,.95)',
+        nodeTransform,
+        driftAnim,
+        rippleDisplay: this.state.camTarget === d.id ? 'block' : 'none',
         onOpen: () => this.open(d.id)
       });
     });
@@ -479,6 +540,10 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
       foundCount: found.length,
       resumeHref: (window.__resources && window.__resources.resumeDocx) || 'uploads/Terrel Andrews Resume 2026.docx',
+      camOrigin: cam ? cam.x + '% ' + cam.y + '%' : '50% 50%',
+      camTransform: zoomed ? 'scale(1.5)' : 'scale(1)',
+      camTransition: 'transform ' + (zoomed ? '680ms cubic-bezier(.22,.85,.3,1.06)' : '620ms cubic-bezier(.3,.7,.25,1.03)'),
+      panelOpacity: this.state.closing ? 0 : 1,
       panelOpen: !!openId,
       isJournal: openId === 'journal',
       isLaptop: openId === 'laptop',
@@ -489,8 +554,8 @@ class Component extends DCLogic {
       isPhotos: openId === 'photos',
       isRadio: openId === 'radio',
       isMug: openId === 'mug',
-      showBriefingCard: showBriefingProp && !this.state.briefingDismissed && !openId && !allFound,
-      showDone: allFound && !openId && !this.state.doneDismissed,
+      showBriefingCard: showBriefingProp && !this.state.briefingDismissed && !openId && !this.state.camTarget && !allFound,
+      showDone: allFound && !openId && !this.state.camTarget && !this.state.doneDismissed,
       vignetteOn: this.props.vignette ?? true,
       soundLabel: this.state.muted ? 'SOUND OFF' : 'SOUND ON',
       close: () => this.close(),
