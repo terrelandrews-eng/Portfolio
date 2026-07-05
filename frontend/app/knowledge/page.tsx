@@ -1,25 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, Entity, Observation, SearchResult } from "@/lib/api";
+import { DomainBadge } from "@/app/components/badge";
+import { Button, Card, EmptyState, ErrorBanner, SectionLabel } from "@/app/components/ui";
+
+const TYPE_ICONS: Record<string, string> = {
+  person: "👤",
+  pet: "🐾",
+  home: "🏠",
+  property: "🏠",
+  vehicle: "🚗",
+  appliance: "🔧",
+  system: "🔧",
+  place: "📍",
+  organization: "🏢",
+};
+
+const STATUS_FILTERS = ["all", "proposed", "active", "retired"] as const;
+
+function Pill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-accent bg-accent text-white"
+          : "border-stone-200 bg-white text-stone-500 hover:border-stone-300"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ConfidenceMeter({ value }: { value: number }) {
+  return (
+    <span className="inline-flex items-center gap-1.5" title={`confidence ${value.toFixed(2)}`}>
+      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-stone-200">
+        <span
+          className="block h-full rounded-full bg-accent/70"
+          style={{ width: `${Math.round(value * 100)}%` }}
+        />
+      </span>
+      <span className="text-[10px] tabular-nums text-stone-400">{Math.round(value * 100)}%</span>
+    </span>
+  );
+}
 
 export default function KnowledgePage() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [searched, setSearched] = useState(false);
   const [entities, setEntities] = useState<Entity[]>([]);
   const [observations, setObservations] = useState<Observation[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
+  const [domainFilter, setDomainFilter] = useState<string>("all");
 
   function loadObservations() {
     api.observations().then(setObservations).catch((e) => setError(String(e)));
   }
 
   useEffect(() => {
-    api
-      .entities()
-      .then(setEntities)
-      .catch((e) => setError(String(e)));
+    api.entities().then(setEntities).catch((e) => setError(String(e)));
     loadObservations();
   }, []);
 
@@ -42,6 +96,7 @@ export default function KnowledgePage() {
     try {
       const res = await api.search(q);
       setResults(res.results);
+      setSearched(true);
     } catch (err) {
       setError(String(err));
     } finally {
@@ -49,116 +104,156 @@ export default function KnowledgePage() {
     }
   }
 
-  const grouped = entities.reduce<Record<string, Entity[]>>((acc, e) => {
-    (acc[e.type] ??= []).push(e);
-    return acc;
-  }, {});
+  const grouped = useMemo(
+    () =>
+      entities.reduce<Record<string, Entity[]>>((acc, e) => {
+        (acc[e.type] ??= []).push(e);
+        return acc;
+      }, {}),
+    [entities],
+  );
+
+  const obsDomains = useMemo(
+    () => ["all", ...Array.from(new Set(observations.map((o) => o.domain))).sort()],
+    [observations],
+  );
+
+  const visibleObs = observations.filter(
+    (o) =>
+      (statusFilter === "all" || o.status === statusFilter) &&
+      (domainFilter === "all" || o.domain === domainFilter),
+  );
 
   return (
     <main className="space-y-10">
       <section>
-        <h1 className="mb-3 text-lg font-semibold">Search knowledge</h1>
+        <h1 className="mb-4 text-2xl font-semibold tracking-tight">Knowledge</h1>
         <form onSubmit={runSearch} className="flex gap-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="e.g. when was the HVAC serviced"
-            className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
+            className="flex-1 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-accent focus:outline-none"
           />
-          <button
-            type="submit"
-            className="rounded bg-accent px-4 py-2 text-sm text-white"
-          >
+          <Button type="submit" disabled={loading} className="px-5">
             {loading ? "…" : "Search"}
-          </button>
+          </Button>
         </form>
 
-        {error && <p className="mt-3 text-sm text-amber-700">{error}</p>}
+        <div className="mt-3">
+          <ErrorBanner message={error} onDismiss={() => setError(null)} />
+        </div>
 
-        <ul className="mt-4 space-y-3">
-          {results.map((r) => (
-            <li key={`${r.source}-${r.id}`} className="rounded border border-gray-200 p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{r.title}</span>
-                <span className="text-xs text-gray-500">
-                  {r.source} · {r.score.toFixed(2)}
-                </span>
+        {searched && (
+          <ul className="mt-4 space-y-2">
+            {results.map((r) => (
+              <li key={`${r.source}-${r.id}`} className="rounded-xl border border-stone-200 bg-white p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{r.title}</span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <DomainBadge domain={r.domain} />
+                    <span className="text-[11px] text-stone-400">
+                      {r.source} · {r.score.toFixed(2)}
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-stone-600">{r.snippet}</p>
+              </li>
+            ))}
+            {!loading && results.length === 0 && (
+              <EmptyState title="No results" hint="Try different words — search is hybrid keyword + semantic." />
+            )}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <SectionLabel>Entities</SectionLabel>
+        <div className="mt-3 space-y-5">
+          {Object.entries(grouped).map(([type, list]) => (
+            <div key={type}>
+              <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-stone-400">
+                {TYPE_ICONS[type] ?? "•"} {type}
+              </h3>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {list.map((e) => (
+                  <Card key={e.id} className="p-3">
+                    <span className="text-sm font-medium">{e.name}</span>
+                    {e.notes && <p className="mt-0.5 text-xs leading-relaxed text-stone-500">{e.notes}</p>}
+                  </Card>
+                ))}
               </div>
-              <p className="mt-1 text-sm text-gray-700">{r.snippet}</p>
-            </li>
+            </div>
           ))}
-          {!loading && q && results.length === 0 && !error && (
-            <li className="text-sm text-gray-500">No results.</li>
-          )}
-        </ul>
+        </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Entities</h2>
-        {Object.entries(grouped).map(([type, list]) => (
-          <div key={type} className="mb-4">
-            <h3 className="mb-1 text-xs uppercase tracking-wide text-gray-500">
-              {type}
-            </h3>
-            <ul className="space-y-1">
-              {list.map((e) => (
-                <li key={e.id} className="rounded bg-white/60 px-3 py-2 text-sm">
-                  <span className="font-medium">{e.name}</span>
-                  {e.notes && <span className="text-gray-600"> — {e.notes}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SectionLabel>Memory — what the system has learned</SectionLabel>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {STATUS_FILTERS.map((s) => (
+            <Pill key={s} active={statusFilter === s} onClick={() => setStatusFilter(s)}>
+              {s}
+            </Pill>
+          ))}
+          <span className="mx-1 w-px bg-stone-200" />
+          {obsDomains.map((d) => (
+            <Pill key={d} active={domainFilter === d} onClick={() => setDomainFilter(d)}>
+              {d}
+            </Pill>
+          ))}
+        </div>
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Memory (observations)</h2>
-        <p className="mb-3 text-sm text-gray-500">
-          What the system has learned. Accept proposals, or retire what&apos;s stale.
-        </p>
-        <ul className="space-y-2">
-          {observations.map((o) => (
+        <ul className="mt-4 space-y-2">
+          {visibleObs.map((o) => (
             <li
               key={o.id}
-              className="flex items-center justify-between gap-3 rounded border border-gray-200 p-3 text-sm"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-4"
             >
-              <span>
-                <span className="text-xs text-gray-400">
-                  [{o.domain} · {o.kind} · {o.confidence.toFixed(2)} · {o.status}]{" "}
-                </span>
-                {o.content}
-              </span>
-              <span className="flex shrink-0 gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <DomainBadge domain={o.domain} />
+                  <span className="text-[11px] text-stone-400">{o.kind}</span>
+                  <ConfidenceMeter value={o.confidence} />
+                  {o.status !== "active" && (
+                    <span className="text-[11px] italic text-stone-400">{o.status}</span>
+                  )}
+                  {o.evidence_count > 1 && (
+                    <span className="text-[11px] text-stone-400">seen ×{o.evidence_count}</span>
+                  )}
+                </div>
+                <p className="mt-1.5 text-sm">{o.content}</p>
+              </div>
+              <span className="flex shrink-0 gap-1">
                 {o.status === "proposed" && (
                   <>
-                    <button
-                      onClick={() => observationAction(o.id, "accept")}
-                      className="text-xs text-accent hover:underline"
-                    >
+                    <Button variant="secondary" onClick={() => observationAction(o.id, "accept")}>
                       Accept
-                    </button>
-                    <button
-                      onClick={() => observationAction(o.id, "reject")}
-                      className="text-xs text-gray-400 hover:underline"
-                    >
+                    </Button>
+                    <Button variant="ghost" onClick={() => observationAction(o.id, "reject")}>
                       Reject
-                    </button>
+                    </Button>
                   </>
                 )}
                 {o.status === "active" && (
-                  <button
-                    onClick={() => observationAction(o.id, "retire")}
-                    className="text-xs text-gray-400 hover:underline"
-                  >
+                  <Button variant="ghost" onClick={() => observationAction(o.id, "retire")}>
                     Retire
-                  </button>
+                  </Button>
                 )}
               </span>
             </li>
           ))}
-          {observations.length === 0 && (
-            <li className="text-sm text-gray-500">No observations yet.</li>
+          {visibleObs.length === 0 && (
+            <EmptyState
+              title="Nothing here"
+              hint={
+                observations.length === 0
+                  ? "Observations appear after weekly reviews and captured notes."
+                  : "No observations match these filters."
+              }
+            />
           )}
         </ul>
       </section>

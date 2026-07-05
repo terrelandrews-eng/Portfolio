@@ -3,5 +3,6 @@
 @tailwind utilities;
 
 body {
-  @apply bg-base text-ink;
+  @apply bg-base text-ink antialiased;
+  font-size: 15px;
 }

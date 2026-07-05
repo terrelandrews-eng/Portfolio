@@ -4,7 +4,87 @@
 > re-deriving context. Spec is [`lifeos-spec.md`](./lifeos-spec.md); build in phase
 > order (§11), verifying each phase's acceptance criteria before the next.
 
-Last updated: 2026-07-04
+Last updated: 2026-07-05
+
+---
+
+## 0. ACTIVE WORK — UI overhaul session handoff (2026-07-05)
+
+**STATUS UPDATE (later on 2026-07-05): ALL SIX PHASES (A–F) IMPLEMENTED AND VERIFIED**
+against the running preview (every workflow exercised: briefing, add/complete/undo task,
+approvals drawer approve, ⌘K capture, week grid + chore chips + grocery localStorage,
+chat markdown/persistence/inline proposal approve, knowledge filters + HVAC search,
+settings status cards + cost table; `tsc --noEmit` clean; desktop + mobile checked).
+New files: `app/components/` (badge, ui, markdown, icons, nav, shell, ApprovalsDrawer,
+QuickCapture), `lib/format.ts`. Modified: layout.tsx (Inter via next/font + Shell),
+globals.css, tailwind.config.ts, lib/api.ts (added `createTask`, `adminCost`, typed
+`Healthz`), all 5 pages rewritten. One bug found & fixed during verification:
+proposal `payload` can be null in the chat SSE `proposals` event — `PayloadPreview`
+guards with `payload ?? {}`. All work is uncommitted on `feat/lifeos-all-phases`.
+Remaining (unchanged): live-key exercise + optional polish (§7).
+
+### The approved plan (now implemented)
+`~/.claude/plans/give-your-analysis-ont-greedy-goblet.md` — six phases, frontend-only:
+- **A** Design system + layout shell: Inter via `next/font`, type scale, muted per-domain
+  color badges (family/health/meals/home/faith/finance/business), sidebar nav desktop +
+  bottom tabs mobile with active states, shared components (`app/components/`: Badge, Card,
+  Button, EmptyState, Skeleton, ErrorBanner), `lib/format.ts` date humanizer, `max-w-5xl`.
+- **B** Global approvals drawer (poll `GET /proposals?status=pending`, nav badge count,
+  approve/reject) + global quick-capture button (posts to `api.capture`). Biggest gap fix.
+- **C** Today: hero briefing card; tasks grouped Overdue/Today/Upcoming/Someday with domain
+  badges + humanized dates; inline add-task; delayed-complete undo toast; markdown in modal.
+- **D** Week: desktop 7-day grid; chores as chips (not comma-string); grocery checks →
+  localStorage keyed by week_start; textarea review answers.
+- **E** Chat: markdown rendering (reuse Today's react-markdown setup — extract shared
+  `app/components/markdown.tsx`); persist messages+sessionId to localStorage + "New chat";
+  auto-scroll; inline proposal cards.
+- **F** Knowledge: observation status/domain filter pills, confidence meter, entity icons.
+  Settings: healthz status cards (not JSON dump), cost table from `GET /admin/cost`
+  (add `adminCost()` to `lib/api.ts`; response: `{runs, tokens_in, tokens_out, errors,
+  by_agent:[{agent, runs, tokens}]}`).
+
+Verified backend facts: `POST /tasks` exists (fields: title, domain required; status
+default "open", priority default 3, due_date/scheduled_for/etc. optional — schemas.py
+`TaskBase`). `GET /admin/cost` exists (shape above). No backend changes needed.
+
+### Demo environment (why it's weird — read before touching)
+1. **System Node 24.14.0 hangs Next.js 14 silently** (wedges at startup/compile, 0% CPU,
+   no output). Next was bumped 14.2.15 → **14.2.33** in `frontend/package.json` (helped but
+   Node 24 still wedges). **Must run the frontend with Node 22.**
+2. Node 22.23.1 was downloaded to the old session scratchpad:
+   `/private/tmp/claude-501/-Users-terrelandrews-Documents-LifeoS-Final/c734885b-1212-458f-a86f-c062c35504c6/scratchpad/node22/`
+   If that dir is gone, re-download: `curl -sL https://nodejs.org/dist/latest-v22.x/node-v22.x-darwin-arm64.tar.gz`
+   (get exact filename from the dist index) and extract to the new scratchpad.
+3. **macOS blocks the Claude preview helper from reading `~/Documents`** (EPERM opening
+   files under the project). So the preview server runs a **copy** of the frontend at
+   `<same scratchpad>/frontend-demo/` (source files copied, then `npm ci` there — a full
+   `cp -R node_modules` is painfully slow, don't). **Workflow: edit real `frontend/`
+   sources → rsync/cp `app/ lib/ *.config.* package.json` to the demo copy → preview.**
+4. `.claude/launch.json` ("lifeos-frontend") runs `bash -c` with the node22 PATH prepended,
+   `cd` into the demo copy, `exec ./node_modules/.bin/next dev`, `autoPort: true`
+   (user has recurring port-3000 conflicts — keep autoPort). Update its paths if the
+   scratchpad changed, then `preview_start`.
+5. Backend CORS was widened for autoPort: `backend/app/main.py` now uses
+   `allow_origin_regex=r"http://localhost:\d+"` (was allow_origins :3000). Intentional, keep.
+   Requires `docker compose restart app` if the container predates the change.
+6. Browser auth: `localStorage.setItem("lifeos_token", "dev-local-token-change-me")` on the
+   app origin (or paste the token in Settings).
+7. Backend runs as before: `docker compose up -d --build`, API :8000, all-mock, healthy.
+   A draft weekly plan + seeded tasks/entities exist in the DB volume.
+
+### Uncommitted changes at handoff (all intentional, keep)
+- `frontend/package.json` + lock: next 14.2.33
+- `backend/app/main.py`: CORS regex
+- `.claude/launch.json`: demo launcher (paths reference the old scratchpad — fix on resume)
+- `HANDOFF.md`: this section
+
+### The design critique (for context on *why* these phases)
+Strengths: calm palette, right IA (5 screens = daily/weekly/adhoc/memory/admin), the
+approve-gated write path is visible in UI. Weaknesses: no visual identity (default font,
+one text size, gray-uppercase labels everywhere), no active nav state, narrow single
+column (Week = wall of stacked cards), raw ISO dates / `p1` codes / JSON dumps, chat has
+no history/markdown/autoscroll, proposals invisible outside a live chat session, no task
+creation anywhere, capture hidden behind `note:` prefix, ephemeral grocery checks.
 
 ---
 

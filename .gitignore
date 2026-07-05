@@ -27,3 +27,10 @@ backups/
 .DS_Store
 .idea/
 .vscode/
+
+# Runtime artifacts
+backend/outbox/
+*.tsbuildinfo
+
+# Machine-specific Claude Code config
+.claude/

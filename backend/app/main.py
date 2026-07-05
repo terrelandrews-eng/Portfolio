@@ -37,7 +37,7 @@ app = FastAPI(title="LifeOS API", version="0.2.0", lifespan=lifespan)
 # Single-user local app; the Next.js dev server calls the API from the browser.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origin_regex=r"http://localhost:\d+",
     allow_methods=["*"],
     allow_headers=["*"],
 )

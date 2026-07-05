@@ -125,6 +125,30 @@ export interface Proposal {
   result: Record<string, unknown>;
 }
 
+export interface TaskCreatePayload {
+  title: string;
+  domain: string;
+  due_date?: string;
+  priority?: number;
+}
+
+export interface Healthz {
+  status: string;
+  db: boolean;
+  mock_integrations: boolean;
+  embeddings: string;
+  llm: string;
+  scheduler: { running: boolean; jobs: { id: string; next_run: string | null }[] };
+}
+
+export interface AdminCost {
+  runs: number;
+  tokens_in: number;
+  tokens_out: number;
+  errors: number;
+  by_agent: { agent: string; runs: number; tokens: number }[];
+}
+
 export interface FinanceSummary {
   month: string;
   total: number;
@@ -143,12 +167,15 @@ export const api = {
     request<{ id: string; version: number; content: string }>(`/priorities`),
   updatePriorities: (content: string) =>
     request(`/priorities`, { method: "PUT", body: JSON.stringify({ content }) }),
-  health: () => request<Record<string, unknown>>(`/healthz`),
+  health: () => request<Healthz>(`/healthz`),
+  adminCost: () => request<AdminCost>(`/admin/cost`),
 
   // Phase 2
   todayBriefing: () => request<Briefing>(`/briefing/today`),
   generateBriefing: () => request<Briefing>(`/briefing/generate`, { method: "POST" }),
   tasks: (status = "open") => request<Task[]>(`/tasks?status=${status}`),
+  createTask: (payload: TaskCreatePayload) =>
+    request<Task>(`/tasks`, { method: "POST", body: JSON.stringify(payload) }),
   completeTask: (id: string) =>
     request<Task>(`/tasks/${id}/complete`, { method: "POST" }),
 
