@@ -31,6 +31,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
 @keyframes ta-fog1{0%{transform:translate3d(-3.5%,-2%,0) scale(1)}50%{transform:translate3d(3%,2.5%,0) scale(1.09)}100%{transform:translate3d(-3.5%,-2%,0) scale(1)}}
 @keyframes ta-fog2{0%{transform:translate3d(3%,2%,0) scale(1.06)}50%{transform:translate3d(-3.5%,-2.5%,0) scale(1)}100%{transform:translate3d(3%,2%,0) scale(1.06)}}
 @keyframes ta-breathe{0%,100%{opacity:0}50%{opacity:.04}}
+@keyframes ta-flyin{0%{opacity:0;transform:translateY(90px) rotate(3deg) scale(.97)}70%{opacity:1;transform:translateY(-8px) rotate(-1.6deg) scale(1.01)}100%{opacity:1;transform:translateY(0) rotate(-1deg) scale(1)}}
 .ta-node>div:last-child{transition:box-shadow .25s ease,transform .25s ease}
 .ta-node:hover>div:last-child{box-shadow:0 0 18px rgba(232,181,74,.85),0 2px 12px rgba(0,0,0,.55);transform:scale(1.12)}
 .ta-panel>div>*{animation:ta-fadeup .45s cubic-bezier(.2,.8,.2,1) both}
@@ -92,12 +93,17 @@ body{margin:0;background:#0B1215;overflow:hidden}
     <div style="position:absolute;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 240px rgba(4,8,10,.6)"></div>
   </sc-if>
 
+  <!-- INTRO VIGNETTE (darker hold, fades out during the pull-back) -->
+  <sc-if value="{{ introVigOn }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:3;pointer-events:none;opacity:{{ introVigOpacity }};transition:opacity 1.8s ease;background:radial-gradient(115% 90% at 50% 62%,rgba(4,8,10,.18) 30%,rgba(4,8,10,.82))"></div>
+  </sc-if>
+
   <!-- CASE TAPE EDGES -->
-  <div style="position:absolute;left:0;right:0;top:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:.75;pointer-events:none"></div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:.75;pointer-events:none"></div>
+  <div style="position:absolute;left:0;right:0;top:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:{{ introTapeOpacity }};transition:opacity 1.2s ease;pointer-events:none"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:5px;z-index:8;background:repeating-linear-gradient(-45deg,#E8B54A 0 14px,#0B1215 14px 28px);opacity:{{ introTapeOpacity }};transition:opacity 1.2s ease;pointer-events:none"></div>
 
   <!-- TOP BAR -->
-  <div style="position:absolute;top:5px;left:0;right:0;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 20px;background:linear-gradient(rgba(6,9,11,.8),rgba(6,9,11,0));pointer-events:none;flex-wrap:wrap">
+  <div style="position:absolute;top:5px;left:0;right:0;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 20px;background:linear-gradient(rgba(6,9,11,.8),rgba(6,9,11,0));pointer-events:none;flex-wrap:wrap;opacity:{{ introUiOpacity }};transition:opacity 1.2s ease">
     <div style="pointer-events:auto;display:flex;gap:18px;align-items:flex-start">
       <div>
         <div style="display:flex;align-items:baseline;gap:10px">
@@ -107,7 +113,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
         <div style="font-size:11.5px;letter-spacing:2px;color:rgba(237,230,210,.85);margin-top:5px;text-shadow:0 1px 6px rgba(0,0,0,.7)">REVOPS &amp; AI SYSTEMS ENGINEER <span style="color:#B0402E">▪</span> STATION: ANTIGUA <span style="color:#B0402E">▪</span> STATUS: <span style="color:#E8B54A">{{ caseStatus }}</span></div>
         <div style="margin-top:8px;height:2px;width:min(420px,50vw);background:linear-gradient(90deg,#E8B54A,rgba(232,181,74,0))"></div>
       </div>
-      <div id="ta-stamp" style="border:3px double #B0402E;color:#B0402E;font-size:10px;font-weight:700;letter-spacing:3px;padding:5px 9px;transform:rotate(-7deg);margin-top:6px;text-shadow:none;background:rgba(6,9,11,.35)">EYES ONLY</div>
+      <div id="ta-stamp" style="border:3px double #B0402E;color:#B0402E;font-size:10px;font-weight:700;letter-spacing:3px;padding:5px 9px;transform:rotate(-7deg);margin-top:6px;text-shadow:none;background:rgba(6,9,11,.35);animation:{{ stampAnim }}">EYES ONLY</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;pointer-events:auto">
       <div style="position:relative">
@@ -129,7 +135,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
   </div>
 
   <!-- FOOTER STRIP -->
-  <div style="position:absolute;left:0;right:0;bottom:5px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 20px 10px;background:linear-gradient(rgba(6,9,11,0),rgba(6,9,11,.82));pointer-events:none;flex-wrap:wrap;font-size:10px;letter-spacing:2px;color:rgba(237,230,210,.65)">
+  <div style="position:absolute;left:0;right:0;bottom:5px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 20px 10px;background:linear-gradient(rgba(6,9,11,0),rgba(6,9,11,.82));pointer-events:none;flex-wrap:wrap;font-size:10px;letter-spacing:2px;color:rgba(237,230,210,.65);opacity:{{ introUiOpacity }};transition:opacity 1.2s ease">
     <div id="ta-coords" style="text-shadow:0 1px 5px rgba(0,0,0,.7)">17.0747° N, 61.7677° W <span style="color:#B0402E">▪</span> FIELD OFFICE — DO NOT DISTURB</div>
     <div style="display:flex;align-items:center;gap:10px">
       <span style="color:rgba(237,230,210,.5)">EVIDENCE LOG</span>
@@ -145,7 +151,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
 
   <!-- BRIEFING CARD -->
   <sc-if value="{{ showBriefingCard }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;left:20px;bottom:48px;z-index:7;width:min(330px,86vw);background:#F2ECDA;color:#26241E;border-radius:4px;box-shadow:0 18px 50px rgba(0,0,0,.55);transform:rotate(-1deg);animation:ta-fadeup .5s cubic-bezier(.2,.8,.2,1);padding:16px 18px">
+    <div style="position:absolute;left:20px;bottom:48px;z-index:7;width:min(330px,86vw);background:#F2ECDA;color:#26241E;border-radius:4px;box-shadow:0 18px 50px rgba(0,0,0,.55);transform:rotate(-1deg);animation:{{ briefAnim }};padding:16px 18px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #26241E;padding-bottom:8px">
         <div style="font-size:11px;letter-spacing:3px;font-weight:700;color:#B0402E">FIELD BRIEFING</div>
         <div style="font-size:10px;letter-spacing:2px;color:rgba(38,36,30,.6)">EYES ONLY</div>
@@ -402,7 +408,7 @@ body{margin:0;background:#0B1215;overflow:hidden}
 </x-dc>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script data-props="{&quot;showBriefing&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;},&quot;vignette&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;}}">
 class Component extends DCLogic {
-  state = { openId: null, camTarget: null, camZoom: false, closing: false, found: [], muted: false, briefingDismissed: false, doneDismissed: false, menuOpen: false };
+  state = { openId: null, camTarget: null, camZoom: false, closing: false, found: [], muted: false, briefingDismissed: false, doneDismissed: false, menuOpen: false, introPhase: 'hold', briefFly: false };
   _wrapRef = React.createRef();
 
   componentDidMount() {
@@ -451,14 +457,47 @@ class Component extends DCLogic {
       this._parRaf = requestAnimationFrame(parTick);
     };
     this._parRaf = requestAnimationFrame(parTick);
+    if (this.cinematic()) {
+      this._introT1 = setTimeout(() => this.setState({ introPhase: 'pull' }), 300);
+      this._introT2 = setTimeout(() => this.setState({ introPhase: 'card', briefFly: true }), 2050);
+      this._introT3 = setTimeout(() => this.endIntro(), 2550);
+      this._onSkip = () => this.skipIntro();
+      window.addEventListener('pointerdown', this._onSkip);
+      window.addEventListener('keydown', this._onSkip);
+    } else {
+      this.setState({ introPhase: 'done' });
+    }
   }
   componentWillUnmount() {
     this.clearCamTimers();
+    this.clearIntro();
     clearTimeout(this._boostT);
     cancelAnimationFrame(this._parRaf);
     window.removeEventListener('mousemove', this._onMouse);
     window.removeEventListener('keydown', this._onKey);
     if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener('change', this._onOrient);
+  }
+
+  clearIntro() {
+    clearTimeout(this._introT1); clearTimeout(this._introT2); clearTimeout(this._introT3);
+    if (this._onSkip) {
+      window.removeEventListener('pointerdown', this._onSkip);
+      window.removeEventListener('keydown', this._onSkip);
+      this._onSkip = null;
+    }
+  }
+  endIntro() {
+    this.clearIntro();
+    this.setState({ introPhase: 'done' });
+  }
+  skipIntro() {
+    if (this.state.introPhase === 'done') return;
+    this.clearIntro();
+    // Cancel the pull transition imperatively (forced reflow) so the camera
+    // snaps to the overview instead of finishing the 2.2s glide.
+    const camEl = document.getElementById('ta-camera');
+    if (camEl) { camEl.style.transition = 'none'; void camEl.offsetHeight; }
+    this.setState({ introPhase: 'done' });
   }
 
   boostMotion() {
@@ -501,8 +540,8 @@ class Component extends DCLogic {
       const found = s.found.includes(id) ? s.found : [...s.found, id];
       try { localStorage.setItem('ta-office-found', JSON.stringify(found)); } catch (e) {}
       return fly
-        ? { camTarget: id, camZoom: true, closing: false, found, menuOpen: false }
-        : { openId: id, camTarget: null, camZoom: false, closing: false, found, menuOpen: false };
+        ? { camTarget: id, camZoom: true, closing: false, found, menuOpen: false, briefFly: false }
+        : { openId: id, camTarget: null, camZoom: false, closing: false, found, menuOpen: false, briefFly: false };
     });
     this.beep(620, 880);
     if (fly) {
@@ -578,6 +617,8 @@ class Component extends DCLogic {
     });
     const allFound = found.length >= DEFS.length;
     const showBriefingProp = this.props.showBriefing ?? true;
+    const introOn = this.state.introPhase !== 'done' && this.cinematic();
+    const introHold = introOn && this.state.introPhase === 'hold';
     return {
       hotspots,
       sceneWrapRef: this._wrapRef,
@@ -590,9 +631,17 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
       foundCount: found.length,
       resumeHref: (window.__resources && window.__resources.resumeDocx) || 'uploads/Terrel Andrews Resume 2026.docx',
-      camOrigin: cam ? cam.x + '% ' + cam.y + '%' : '50% 50%',
-      camTransform: zoomed ? 'scale(1.5)' : 'scale(1)',
-      camTransition: 'transform ' + (zoomed ? '680ms cubic-bezier(.22,.85,.3,1.06)' : '620ms cubic-bezier(.3,.7,.25,1.03)'),
+      camOrigin: introOn ? '50% 72%' : (cam ? cam.x + '% ' + cam.y + '%' : '50% 50%'),
+      camTransform: introOn ? (introHold ? 'scale(1.35)' : 'scale(1)') : (zoomed ? 'scale(1.5)' : 'scale(1)'),
+      camTransition: introOn
+        ? (introHold ? 'none' : 'transform 2200ms cubic-bezier(.22,.85,.3,1.03)')
+        : 'transform ' + (zoomed ? '680ms cubic-bezier(.22,.85,.3,1.06)' : '620ms cubic-bezier(.3,.7,.25,1.03)'),
+      introVigOn: introOn,
+      introVigOpacity: introHold ? 1 : 0,
+      introUiOpacity: introHold ? 0 : 1,
+      introTapeOpacity: introHold ? 0 : 0.75,
+      stampAnim: introOn && this.state.introPhase === 'card' ? 'ta-stamp .5s cubic-bezier(.2,.8,.2,1) both' : 'none',
+      briefAnim: this.state.briefFly ? 'ta-flyin .8s cubic-bezier(.22,.85,.3,1.06) both' : 'ta-fadeup .5s cubic-bezier(.2,.8,.2,1)',
       panelOpacity: this.state.closing ? 0 : 1,
       panelOpen: !!openId,
       isJournal: openId === 'journal',
@@ -604,8 +653,8 @@ class Component extends DCLogic {
       isPhotos: openId === 'photos',
       isRadio: openId === 'radio',
       isMug: openId === 'mug',
-      showBriefingCard: showBriefingProp && !this.state.briefingDismissed && !openId && !this.state.camTarget && !allFound,
-      showDone: allFound && !openId && !this.state.camTarget && !this.state.doneDismissed,
+      showBriefingCard: showBriefingProp && !this.state.briefingDismissed && !openId && !this.state.camTarget && !allFound && (this.state.introPhase === 'card' || this.state.introPhase === 'done'),
+      showDone: allFound && !openId && !this.state.camTarget && !this.state.doneDismissed && this.state.introPhase === 'done',
       vignetteOn: this.props.vignette ?? true,
       soundLabel: this.state.muted ? 'SOUND OFF' : 'SOUND ON',
       close: () => this.close(),
