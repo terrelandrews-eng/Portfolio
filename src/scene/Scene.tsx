@@ -1,0 +1,22 @@
+// Everything that lives inside the <Canvas>: background/fog, the camera rig,
+// and the room + exhibit content. SceneRoot owns the Canvas shell (DOM
+// wrapper, camera/dpr/shadow config); this owns what's drawn.
+
+import { colors } from '../theme/tokens';
+import CameraRig from './CameraRig';
+import Room from './Room';
+import Placeholders from './exhibits/Placeholders';
+
+export default function Scene() {
+  return (
+    <>
+      <color attach="background" args={[colors.bg]} />
+      <fogExp2 attach="fog" args={[colors.bg, 0.045]} />
+      {/* The rig owns the camera every frame (position + look): idle drift,
+          fly-to/return dollies, mouse-look. Replaces the old one-shot aim. */}
+      <CameraRig />
+      <Room />
+      <Placeholders />
+    </>
+  );
+}

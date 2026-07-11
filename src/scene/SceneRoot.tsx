@@ -1,24 +1,29 @@
-import { colors, fonts } from '../theme/tokens';
+// Canvas shell: fills the viewport, owns camera/dpr/shadow config. Scene
+// content (background, fog, room, exhibits) lives in Scene.tsx.
 
-// Placeholder for the 3D scene. Real @react-three/fiber Canvas + room +
-// camera rig lands in M2.
+import { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { zIndex } from '../theme/tokens';
+import Scene from './Scene';
+
 export default function SceneRoot() {
   return (
     <div
       style={{
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: colors.bg,
-        color: colors.paperMuted,
-        fontFamily: fonts.mono,
-        letterSpacing: '0.08em',
-        opacity: 0.5,
+        position: 'fixed',
+        inset: 0,
+        zIndex: zIndex.canvas,
       }}
     >
-      SCENE — M2
+      <Canvas
+        camera={{ position: [0, 1.45, 2.3], fov: 55 }}
+        dpr={[1, 1.75]}
+        shadows={false}
+      >
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
+      </Canvas>
     </div>
   );
 }

@@ -1,0 +1,206 @@
+/* Exhibit panel chrome — "Case File No. 220" paper look, ported from the
+ * legacy source (legacy/Agent Office Ship.dc.html), specifically the
+ * .ta-panel* rules and the #panelOverlay markup (~lines 150-420).
+ *
+ * Color/z-index come in as CSS custom properties set inline by
+ * ExhibitPanel.tsx from src/theme/tokens.ts — this file stays free of
+ * hard-coded hex so tokens.ts remains the single source of truth.
+ * Animation timings below are a deliberate 1:1 port of the legacy
+ * keyframes/delays and are not theme tokens, so they're literal here.
+ */
+
+@keyframes ta-panel-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ta-panel-fadeup {
+  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.ta-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ta-panel-z, 200);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--ta-panel-backdrop-bg, rgba(11, 18, 21, 0.62));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: ta-panel-fadein 220ms ease;
+  opacity: 1;
+  transition: opacity 180ms ease;
+}
+
+.ta-panel-backdrop.is-closing {
+  opacity: 0;
+}
+
+.ta-panel {
+  position: relative;
+  width: min(680px, 94vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--ta-panel-paper, #f2ecda);
+  color: var(--ta-panel-ink, #080d0f);
+  font-family: var(--ta-panel-font, 'Courier Prime', 'Courier New', monospace);
+  border-radius: 6px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: ta-panel-fadeup 350ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: opacity 180ms ease;
+  opacity: 1;
+}
+
+.ta-panel.is-closing {
+  opacity: 0;
+  animation: none;
+}
+
+.ta-panel__close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 14px 16px 0 0;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 7px 13px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.ta-panel__close:hover,
+.ta-panel__close:focus-visible {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-panel__close:focus-visible {
+  outline: 2px solid var(--ta-panel-amber, #e8b54a);
+  outline-offset: 2px;
+}
+
+.ta-panel__content {
+  padding: 26px 30px 34px;
+}
+
+/* Staggered reveal: kicker -> title -> divider -> body (ported 1:1 from
+ * the legacy `.ta-panel>div>*` nth-child delay table). */
+.ta-panel__content > * {
+  animation: ta-panel-fadeup 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.ta-panel__content > *:nth-child(1) { animation-delay: 0.05s; }
+.ta-panel__content > *:nth-child(2) { animation-delay: 0.13s; }
+.ta-panel__content > *:nth-child(3) { animation-delay: 0.21s; }
+.ta-panel__content > *:nth-child(n+4) { animation-delay: 0.29s; }
+
+.ta-panel__kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  color: var(--ta-panel-stamp, #b0402e);
+  text-transform: uppercase;
+}
+
+.ta-panel__title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.ta-panel__divider {
+  border-bottom: 2px solid var(--ta-panel-ink, #080d0f);
+  margin: 12px 0 18px;
+}
+
+.ta-panel__body {
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.ta-panel__section {
+  display: grid;
+  gap: 4px;
+}
+
+.ta-panel__paragraph {
+  margin: 8px 0;
+}
+
+.ta-panel__heading {
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin: 18px 0 6px;
+  border-bottom: 1px solid rgba(8, 13, 15, 0.3);
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.ta-panel__list {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 4px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.ta-panel__list li {
+  display: flex;
+  gap: 10px;
+}
+
+.ta-panel__list li::before {
+  content: '\25b8';
+  color: var(--ta-panel-stamp, #b0402e);
+  font-weight: 700;
+  flex: none;
+}
+
+.ta-panel__link-button {
+  display: inline-block;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 9px 16px;
+  border-radius: 3px;
+  text-decoration: none;
+  margin: 6px 0 4px;
+}
+
+.ta-panel__link-button:hover {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-panel__image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  margin: 0 0 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta-panel-backdrop {
+    animation: none;
+  }
+
+  .ta-panel {
+    animation: none;
+  }
+
+  .ta-panel__content > * {
+    animation: none !important;
+  }
+}
