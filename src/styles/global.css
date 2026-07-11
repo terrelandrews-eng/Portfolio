@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  background: #0b1215;
+  color: #ede6d2;
+  font-family: 'Courier Prime', monospace;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}

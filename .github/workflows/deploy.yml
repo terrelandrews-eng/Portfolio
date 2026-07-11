@@ -1,0 +1,75 @@
+name: Deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check for scaffold
+        id: guard
+        run: |
+          if [ -f package.json ]; then
+            echo "scaffold=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scaffold=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json found at repo root — skipping build (tree not yet scaffolded)."
+          fi
+
+      - name: Install dependencies
+        if: steps.guard.outputs.scaffold == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.guard.outputs.scaffold == 'true'
+        run: npm run build
+
+      - name: Copy legacy site into dist
+        if: steps.guard.outputs.scaffold == 'true'
+        run: |
+          mkdir -p dist/legacy
+          cp legacy/index.html dist/legacy/index.html
+
+      - name: Configure Pages
+        if: steps.guard.outputs.scaffold == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: steps.guard.outputs.scaffold == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

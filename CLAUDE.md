@@ -22,25 +22,29 @@ serving the root of `main`.
 
 ## Legacy edit workflow (current site)
 
-`index.html` is a BUILT ARTIFACT: a custom bundler format with base64-encoded
-assets. Do not hand-edit it directly — it's generated, not authored.
+As of the `rebuild/3d` branch, the legacy site now lives under `legacy/`
+rather than the repo root. Paths below reflect that move.
 
-The authoring source is `Agent Office Ship.dc.html`. It carries the real
-page markup, styles, and structure in readable form.
+`legacy/index.html` is a BUILT ARTIFACT: a custom bundler format with
+base64-encoded assets. Do not hand-edit it directly — it's generated, not
+authored.
 
-`index.html` embeds that markup as a JSON string inside a
+The authoring source is `legacy/Agent Office Ship.dc.html`. It carries the
+real page markup, styles, and structure in readable form.
+
+`legacy/index.html` embeds that markup as a JSON string inside a
 `<script type="__bundler/template">` tag. To make a content or markup
 change:
 
-1. Edit `Agent Office Ship.dc.html` directly, OR extract the current
-   embedded template out of `index.html` first if you need to see what's
-   actually deployed:
+1. Edit `legacy/Agent Office Ship.dc.html` directly, OR extract the
+   current embedded template out of `legacy/index.html` first if you need
+   to see what's actually deployed:
    ```
-   python3 tools/repack.py extract <out-template.html>
+   python3 legacy/tools/repack.py extract <out-template.html>
    ```
-2. Inject your edited template back into `index.html`:
+2. Inject your edited template back into `legacy/index.html`:
    ```
-   python3 tools/repack.py inject <in-template.html>
+   python3 legacy/tools/repack.py inject <in-template.html>
    ```
    This re-serializes the file as JSON and escapes `</` to `<\/` so an
    embedded `</script>` (or similar) can't terminate the carrier tag early
@@ -48,13 +52,11 @@ change:
    `repack.py inject`.
 3. Verify locally before pushing:
    ```
-   python3 tools/serve.py
+   python3 legacy/tools/serve.py
    ```
-   Serves the repo root at `http://127.0.0.1:8734` — the same layout
-   GitHub Pages serves in production, so this is a faithful local preview.
-
-`trash.html` is leftover junk from an old rename. Ignore it; don't edit or
-reference it.
+   Serves the `legacy/` directory at `http://127.0.0.1:8734` — the same
+   layout GitHub Pages serves it at in production (`/Portfolio/legacy/`),
+   so this is a faithful local preview.
 
 ## Content invariants
 
@@ -83,10 +85,25 @@ these are the product, not incidental content:
 The site is being rebuilt as an immersive 3D experience: Vite + React +
 TypeScript + `@react-three/fiber`, on branch `rebuild/3d`.
 
-This section will be filled in with real dev commands (`npm run dev`,
-`npm run build`, `npm run preview`, etc.) once the scaffold lands. Until
-then, treat the legacy workflow above as the only supported way to edit
-the live site.
+The legacy site (`index.html`, `Agent Office Ship.dc.html`, `tools/`) now
+lives under `legacy/`. Use `python3 legacy/tools/serve.py` for a local
+preview of it (serves at `http://127.0.0.1:8734`); the extract/inject
+workflow above still applies, just with paths rooted at `legacy/`.
+
+Dev commands for the new stack, run from the repo root:
+
+```bash
+npm install
+npm run dev       # http://127.0.0.1:5173/Portfolio/
+npm run build     # tsc --noEmit, then vite build -> dist/
+npm run preview   # serve the production build locally
+```
+
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds on every
+pull request and deploys to GitHub Pages on push to `main`. It copies
+`legacy/index.html` into `dist/legacy/index.html` as part of the build, so
+the legacy experience stays reachable at `/Portfolio/legacy/` once this
+branch cuts over.
 
 After cutover, the legacy site stays live at `/Portfolio/legacy/` rather
 than being deleted.
