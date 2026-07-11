@@ -204,3 +204,347 @@
     animation: none !important;
   }
 }
+
+/* =======================================================================
+ * M3.2 — per-exhibit renderer rules
+ *
+ * One block per exhibit component (src/ui/panels/*.tsx), each prefixed
+ * with the exhibit's own class namespace (ta-journal-*, ta-laptop-*,
+ * etc). All values below are ported 1:1 from the matching `sc-if` block
+ * in legacy/Agent Office Ship.dc.html (~lines 187-402). Colors that map
+ * to theme/tokens.ts reuse the `--ta-panel-*` custom properties already
+ * threaded in by ExhibitPanel.tsx; colors that only exist in this one
+ * legacy block (terminal green, card paper, etc) are literal hex, same
+ * as the legacy source itself.
+ * ===================================================================== */
+
+/* --- B: Journal (résumé) ------------------------------------------- */
+
+.ta-journal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ta-journal-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.ta-journal-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--ta-panel-stamp, #b0402e);
+  font-weight: 700;
+}
+
+.ta-journal-download {
+  margin: 0;
+  flex: none;
+}
+
+.ta-journal-summary {
+  margin: 16px 0;
+}
+
+.ta-journal-postings {
+  display: grid;
+  gap: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 4px;
+}
+
+.ta-journal-posting__head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ta-journal-posting__dates {
+  color: rgba(8, 13, 15, 0.6);
+}
+
+.ta-journal-posting__desc {
+  margin-top: 4px;
+}
+
+.ta-journal-training {
+  font-size: 13px;
+}
+
+/* --- C: Laptop (terminal / projects) -------------------------------- */
+
+.ta-laptop-terminal {
+  background: #0e1b14;
+  border-radius: 6px;
+  padding: 22px 24px;
+  color: #bfe8c4;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.ta-laptop-terminal__line {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #6fcf7e;
+  margin-bottom: 18px;
+}
+
+.ta-laptop-projects {
+  display: grid;
+  gap: 18px;
+}
+
+.ta-laptop-project {
+  border: 1px solid rgba(111, 207, 126, 0.3);
+  border-radius: 4px;
+  padding: 16px 18px;
+}
+
+.ta-laptop-project__head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.ta-laptop-project__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #eaf6e8;
+}
+
+.ta-laptop-project__tag {
+  font-size: 11px;
+  color: #6fcf7e;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.ta-laptop-project__body {
+  font-size: 12.5px;
+  line-height: 1.7;
+  margin: 8px 0 0;
+  color: rgba(234, 246, 232, 0.85);
+}
+
+.ta-laptop-project__highlight {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ta-panel-amber, #e8b54a);
+  letter-spacing: 1px;
+}
+
+/* --- D: Phone (secure line / contact) ------------------------------- */
+
+.ta-phone-intro {
+  margin: 0 0 22px;
+}
+
+.ta-phone-rows {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.ta-phone-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ta-phone-row--solid {
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  padding: 16px 20px;
+}
+
+.ta-phone-row--solid:hover,
+.ta-phone-row--solid:focus-visible {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-phone-row--outline {
+  border: 2px solid var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-ink, #080d0f);
+  padding: 14px 20px;
+}
+
+.ta-phone-row--outline:hover,
+.ta-phone-row--outline:focus-visible {
+  border-color: var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-phone-row__label {
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.ta-phone-row__value {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+/* --- E: Board (pinboard / tech stack) ------------------------------- */
+
+.ta-board-subheading {
+  font-size: 12.5px;
+  color: rgba(8, 13, 15, 0.65);
+  margin: 8px 0 18px;
+}
+
+.ta-board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.ta-board-card {
+  background: #fbf7ea;
+  border: 1px solid rgba(8, 13, 15, 0.25);
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.ta-board-card:nth-child(4n + 1) { transform: rotate(-0.6deg); }
+.ta-board-card:nth-child(4n + 2) { transform: rotate(0.7deg); }
+.ta-board-card:nth-child(4n + 3) { transform: rotate(0.5deg); }
+.ta-board-card:nth-child(4n + 4) { transform: rotate(-0.8deg); }
+
+.ta-board-card__pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ta-panel-stamp, #b0402e);
+  transform: translateX(-50%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.ta-board-card__heading {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--ta-panel-stamp, #b0402e);
+  margin-bottom: 8px;
+}
+
+.ta-board-card__lines {
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+/* --- F: Shelf (credentials / skills) -------------------------------- */
+
+.ta-shelf-heading--first {
+  margin-top: 0;
+}
+
+.ta-shelf-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ta-shelf-pill {
+  border: 1.5px solid var(--ta-panel-ink, #080d0f);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+/* --- G: Photos (polaroids / field notes) ---------------------------- */
+
+.ta-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.ta-photos-card {
+  background: #fbf7ea;
+  padding: 10px 10px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ta-photos-card:nth-child(4n + 1) { transform: rotate(-1deg); }
+.ta-photos-card:nth-child(4n + 2) { transform: rotate(1deg); }
+.ta-photos-card:nth-child(4n + 3) { transform: rotate(0.6deg); }
+.ta-photos-card:nth-child(4n + 4) { transform: rotate(-0.8deg); }
+
+.ta-photos-card__frame {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(-45deg, #e7e0cc 0 10px, #efe9d8 10px 20px);
+  border: 1px solid rgba(8, 13, 15, 0.2);
+}
+
+.ta-photos-card__stamp {
+  border: 3px double var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 9px;
+  transform: rotate(-6deg);
+}
+
+.ta-photos-card__caption {
+  font-size: 11.5px;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* --- H: Radio (transmission block) ---------------------------------- */
+
+.ta-radio-transmission {
+  display: grid;
+  gap: 2px;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-amber, #e8b54a);
+  border-radius: 4px;
+  padding: 18px 20px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+.ta-radio-transmission__glyphs {
+  color: rgba(232, 181, 74, 0.55);
+}
+
+.ta-radio-paragraph {
+  margin: 16px 0 0;
+}
+
+/* --- I: Mug (stamp) --------------------------------------------------- */
+
+.ta-mug-stamp {
+  display: inline-block;
+  border: 4px double var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 10px 18px;
+  transform: rotate(-3deg);
+}
+
+.ta-mug-paragraph {
+  margin: 18px 0 0;
+}

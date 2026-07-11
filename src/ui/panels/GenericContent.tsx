@@ -1,147 +1,48 @@
-// Generic body renderer for exhibit panels (M3.1). Switches on
-// `content.kind` and dumps the variant's text fields as readable
-// paragraphs/lists — NOT the final per-exhibit visual treatment. A later
-// task splits each case below into its own dedicated renderer that
-// matches the legacy layout (terminal blocks, pinboard cards, polaroids,
-// etc). Keep this switch as the seam for that split.
+// Dispatcher for exhibit panel bodies (M3.2). Switches on `content.kind`
+// and delegates to the dedicated per-exhibit renderer that matches the
+// legacy visual treatment (résumé layout, terminal cards, pinboard,
+// polaroids, etc). Keep the exhaustiveness guard below — it is the seam
+// that forces a new case here whenever ExhibitContent grows a variant.
 
-import type { ReactNode } from 'react';
 import type { ExhibitContent } from '../../content/exhibits';
-
-function Paragraph({ children }: { children: ReactNode }) {
-  return <p className="ta-panel__paragraph">{children}</p>;
-}
-
-function Heading({ children }: { children: ReactNode }) {
-  return <div className="ta-panel__heading">{children}</div>;
-}
-
-function List({ items }: { items: string[] }) {
-  return (
-    <ul className="ta-panel__list">
-      {items.map((item, i) => (
-        <li key={i}>{item}</li>
-      ))}
-    </ul>
-  );
-}
+import WindowContent from './WindowContent';
+import JournalContent from './JournalContent';
+import LaptopContent from './LaptopContent';
+import PhoneContent from './PhoneContent';
+import BoardContent from './BoardContent';
+import ShelfContent from './ShelfContent';
+import PhotosContent from './PhotosContent';
+import RadioContent from './RadioContent';
+import MugContent from './MugContent';
 
 export default function GenericContent({ content }: { content: ExhibitContent }) {
   switch (content.kind) {
     case 'paragraphs':
-      return (
-        <div className="ta-panel__section">
-          {content.image && (
-            <img className="ta-panel__image" src={content.image.src} alt={content.image.alt} />
-          )}
-          {content.paragraphs.map((p, i) => (
-            <Paragraph key={i}>{p}</Paragraph>
-          ))}
-        </div>
-      );
+      return <WindowContent content={content} />;
 
     case 'resume':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>
-            <strong>{content.name}</strong> — {content.title}
-          </Paragraph>
-          <Paragraph>{content.summary}</Paragraph>
-          <a className="ta-panel__link-button" href={content.resumeHref} download={content.resumeDownloadName}>
-            {content.resumeLabel}
-          </a>
-          <Heading>{content.achievementsHeading}</Heading>
-          <List items={content.achievements} />
-          <Heading>{content.postingsHeading}</Heading>
-          <List
-            items={content.postings.map(
-              (p) => `${p.title} (${p.dateRange}) — ${p.description}`
-            )}
-          />
-          <Heading>{content.trainingHeading}</Heading>
-          <Paragraph>{content.training}</Paragraph>
-        </div>
-      );
+      return <JournalContent content={content} />;
 
     case 'projects':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>{content.terminalLine}</Paragraph>
-          <List
-            items={content.projects.map(
-              (p) =>
-                `${p.number} · ${p.title} [${p.tag}] — ${p.body}${
-                  p.highlight ? ` (${p.highlight})` : ''
-                }`
-            )}
-          />
-        </div>
-      );
+      return <LaptopContent content={content} />;
 
     case 'contact':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>{content.intro}</Paragraph>
-          <List
-            items={[
-              `${content.emailLabel}: ${content.email}`,
-              `${content.linkedinLabel}: ${content.linkedinHandle}`,
-            ]}
-          />
-        </div>
-      );
+      return <PhoneContent content={content} />;
 
     case 'pinboard':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>{content.subheading}</Paragraph>
-          {content.cards.map((card, i) => (
-            <div key={i}>
-              <Heading>{card.heading}</Heading>
-              <List items={card.lines} />
-            </div>
-          ))}
-        </div>
-      );
+      return <BoardContent content={content} />;
 
     case 'credentials':
-      return (
-        <div className="ta-panel__section">
-          <Heading>{content.certsHeading}</Heading>
-          <List items={content.certs} />
-          <Heading>{content.skillsHeading}</Heading>
-          <List items={content.skills} />
-        </div>
-      );
+      return <ShelfContent content={content} />;
 
     case 'photos':
-      return (
-        <div className="ta-panel__section">
-          <List
-            items={content.polaroids.map((p) => `[${content.placeholderStamp}] ${p.caption}`)}
-          />
-          <Heading>{content.fieldNotesHeading}</Heading>
-          <List items={content.fieldNotes} />
-        </div>
-      );
+      return <PhotosContent content={content} />;
 
     case 'radio':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>{content.transmissionLabel}</Paragraph>
-          <Paragraph>{content.staticGlyphs}</Paragraph>
-          <Paragraph>{content.transmissionNote}</Paragraph>
-          <Paragraph>{content.paragraph}</Paragraph>
-        </div>
-      );
+      return <RadioContent content={content} />;
 
     case 'mug':
-      return (
-        <div className="ta-panel__section">
-          <Paragraph>[{content.stamp}]</Paragraph>
-          <Paragraph>{content.paragraph}</Paragraph>
-        </div>
-      );
+      return <MugContent content={content} />;
 
     default: {
       // Exhaustiveness guard: TS errors here if a new ExhibitContent

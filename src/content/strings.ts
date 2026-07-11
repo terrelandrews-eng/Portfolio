@@ -55,6 +55,13 @@ export interface IdentityConfirmedStrings {
   emailButton: string;
   linkedinButton: string;
   resetButton: string;
+  /**
+   * Not present in the legacy source (legacy resets immediately on click,
+   * no confirm step). Added for M3.3's inline two-step reset row in
+   * EvidenceMenu.tsx, which needs a confirm state instead of
+   * window.confirm (would block the page). Author's copy, not a legacy port.
+   */
+  resetConfirm: string;
 }
 
 export interface PanelChromeStrings {
@@ -112,6 +119,7 @@ export const STRINGS: Strings = {
     emailButton: 'EMAIL THE AGENT',
     linkedinButton: 'LINKEDIN',
     resetButton: 'RESET CASE',
+    resetConfirm: 'CONFIRM RESET?',
   },
   panelChrome: {
     closeButton: '✕ CLOSE',

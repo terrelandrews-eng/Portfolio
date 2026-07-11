@@ -1,31 +1,24 @@
-import { colors, fonts, zIndex } from '../theme/tokens';
+import { useAppStore } from '../state/store';
+import Hud, { hudVars } from './Hud';
 import ExhibitPanel from './ExhibitPanel';
+import './hud.css';
 
-// Placeholder top bar chrome. Real exhibit tracker, mute/menu controls,
-// and briefing card land in a later HUD task. The exhibit panel layer
-// (M3.1) mounts here alongside it.
+// Composition root for the case-file HUD (M3.3): top bar, footer strip,
+// evidence tracker + dropdown (all in Hud.tsx / EvidenceMenu.tsx, the
+// latter mounted from within Hud), plus the exhibit panel layer (M3.1,
+// unmodified — owned by another task/agent).
+//
+// The HUD is hidden (opacity 0, non-interactive) until the intro sequence
+// finishes (`introPhase === 'done'`), via a CSS class toggle rather than
+// unmounting, so its fade-in transition (see hud.css) can play.
 export default function HudRoot() {
+  const introPhase = useAppStore((s) => s.introPhase);
+  const introDone = introPhase === 'done';
+
   return (
     <>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: zIndex.hud,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '14px 20px',
-          color: colors.amber,
-          fontFamily: fonts.mono,
-          fontSize: 13,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          pointerEvents: 'none',
-        }}
-      >
-        CASE FILE № 220 — T. ANDREWS
+      <div className={`ta-hud${introDone ? '' : ' ta-hud--hidden'}`} style={hudVars()}>
+        <Hud />
       </div>
       <ExhibitPanel />
     </>
