@@ -93,7 +93,10 @@ function clearStorage(): void {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  introPhase: 'hold',
+  // TEMPORARY until M6 builds the real intro sequence: start with the intro
+  // already done so the rig, HUD, and markers are live on load. M6 must flip
+  // this back to 'hold' when it wires the choreographed intro.
+  introPhase: 'done',
   focusId: null,
   panelId: null,
   found: readFound(),
