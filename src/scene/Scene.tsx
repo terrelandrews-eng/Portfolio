@@ -6,6 +6,9 @@ import { colors } from '../theme/tokens';
 import CameraRig from './CameraRig';
 import Room from './Room';
 import Placeholders from './exhibits/Placeholders';
+import Effects from './Effects';
+import LightShafts from './atmosphere/LightShafts';
+import DustMotes from './atmosphere/DustMotes';
 
 export default function Scene() {
   return (
@@ -17,6 +20,11 @@ export default function Scene() {
       <CameraRig />
       <Room />
       <Placeholders />
+      {/* Atmosphere (M5): additive window shafts + drifting dust motes. */}
+      <LightShafts />
+      <DustMotes />
+      {/* Post chain (M5): Bloom -> DoF (high tier) -> Vignette -> Noise. */}
+      <Effects />
     </>
   );
 }

@@ -9,6 +9,7 @@
 // Window opening in the back wall, centered near (0.9, 1.7), 1.6w x 1.1h.
 
 import { PALETTE } from './materials';
+import Lighting from './Lighting';
 import Desk from './props/Desk';
 import Chair from './props/Chair';
 import CeilingFan from './props/CeilingFan';
@@ -36,22 +37,11 @@ export default function Room() {
 
   return (
     <group>
-      {/* --- Lighting (temporary; M5 owns final lighting) ------------ */}
-      <ambientLight color={PALETTE.wall} intensity={0.85} />
-      <directionalLight
-        color="#FBE3AE"
-        position={[0.9, 2.2, -1]}
-        intensity={1.2}
-      />
-      <pointLight color={PALETTE.marker} position={[0.35, 1.15, -1.1]} intensity={1.6} distance={5} />
-      {/* Dim warm fills so wall exhibits read at their dollies (right wall:
-          photo string; back-left: corkboard + bookshelf); M5 replaces all
-          of this. */}
-      <pointLight color={PALETTE.lampGlow} position={[2.4, 2.0, -0.2]} intensity={0.5} distance={3.5} />
-      <pointLight color={PALETTE.lampGlow} position={[-1.7, 2.1, -1.4]} intensity={0.55} distance={4} />
+      {/* --- Lighting (M5 rig: ambient + window key + lamp + fan spot) --- */}
+      <Lighting />
 
       {/* --- Floor ----------------------------------------------------- */}
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
         <meshLambertMaterial color={PALETTE.floor} />
       </mesh>
@@ -63,7 +53,7 @@ export default function Room() {
       </mesh>
 
       {/* --- Left wall (solid) ------------------------------------------ */}
-      <mesh position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}>
+      <mesh position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]} receiveShadow>
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_DEPTH]} />
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>
@@ -82,22 +72,22 @@ export default function Room() {
 
       {/* --- Back wall, windowed: built from 4 boxes around the opening -- */}
       {/* left segment, full height */}
-      <mesh position={[-ROOM_WIDTH / 2 + backWallLeftW / 2, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2]}>
+      <mesh position={[-ROOM_WIDTH / 2 + backWallLeftW / 2, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2]} receiveShadow>
         <boxGeometry args={[backWallLeftW, ROOM_HEIGHT, WALL_THICKNESS]} />
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>
       {/* right segment, full height */}
-      <mesh position={[winRight + backWallRightW / 2, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2]}>
+      <mesh position={[winRight + backWallRightW / 2, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2]} receiveShadow>
         <boxGeometry args={[backWallRightW, ROOM_HEIGHT, WALL_THICKNESS]} />
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>
       {/* segment below the opening */}
-      <mesh position={[WINDOW_CENTER[0], winBottom / 2, -ROOM_DEPTH / 2]}>
+      <mesh position={[WINDOW_CENTER[0], winBottom / 2, -ROOM_DEPTH / 2]} receiveShadow>
         <boxGeometry args={[WINDOW_W, winBottom, WALL_THICKNESS]} />
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>
       {/* segment above the opening */}
-      <mesh position={[WINDOW_CENTER[0], winTop + (ROOM_HEIGHT - winTop) / 2, -ROOM_DEPTH / 2]}>
+      <mesh position={[WINDOW_CENTER[0], winTop + (ROOM_HEIGHT - winTop) / 2, -ROOM_DEPTH / 2]} receiveShadow>
         <boxGeometry args={[WINDOW_W, ROOM_HEIGHT - winTop, WALL_THICKNESS]} />
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>

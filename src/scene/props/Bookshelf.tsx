@@ -173,7 +173,11 @@ export default function Bookshelf({ position = [0, 0, 0], rotationY = 0 }: PropP
   // Dedicated, non-cached material for the instanced books — see the
   // DEVIATION note at the top of this file for why flatMat() can't be
   // reused here.
-  const bookMaterial = useMemo(() => new THREE.MeshLambertMaterial({ vertexColors: true }), []);
+  // No `vertexColors: true` here: instanceColor is auto-detected by three's
+  // shader (USE_INSTANCING_COLOR), while vertexColors makes it expect a
+  // per-vertex `color` attribute this geometry doesn't have — the unbound
+  // attribute reads black and zeroes the diffuse (books rendered black).
+  const bookMaterial = useMemo(() => new THREE.MeshLambertMaterial(), []);
 
   const bookMatrices = useMemo(
     () =>

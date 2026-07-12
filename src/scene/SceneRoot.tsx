@@ -18,7 +18,7 @@ export default function SceneRoot() {
       <Canvas
         camera={{ position: [0, 1.45, 2.3], fov: 55 }}
         dpr={[1, 1.75]}
-        shadows={false}
+        shadows="soft"
       >
         <Suspense fallback={null}>
           <Scene />
