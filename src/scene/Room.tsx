@@ -9,6 +9,12 @@
 // Window opening in the back wall, centered near (0.9, 1.7), 1.6w x 1.1h.
 
 import { PALETTE } from './materials';
+import Desk from './props/Desk';
+import Chair from './props/Chair';
+import CeilingFan from './props/CeilingFan';
+import DeskLamp from './props/DeskLamp';
+import Clutter from './props/Clutter';
+import Outside from './props/Outside';
 
 const ROOM_WIDTH = 6.4;
 const ROOM_DEPTH = 5.2;
@@ -91,43 +97,17 @@ export default function Room() {
         <meshLambertMaterial color={PALETTE.wall} />
       </mesh>
 
-      {/* --- "Outside" backdrop seen through the window opening --------- */}
-      <mesh position={[WINDOW_CENTER[0], WINDOW_CENTER[1], -4]}>
-        <planeGeometry args={[4, 3]} />
-        <meshBasicMaterial color={PALETTE.sky} />
-      </mesh>
+      {/* --- The world outside the window (sea, sky, palms, boat) ------- */}
+      <Outside />
 
-      {/* --- Placeholder desk -------------------------------------------- */}
-      <Desk />
-    </group>
-  );
-}
-
-function Desk() {
-  const topY = 0.75;
-  const topThickness = 0.08;
-  const legHeight = topY - topThickness / 2; // bottom of top surface
-  const legSize = 0.06;
-  const halfW = 1.9 / 2 - 0.08; // inset legs slightly from the edges
-  const halfD = 0.8 / 2 - 0.08;
-
-  return (
-    <group position={[0.3, 0, -1.2]} rotation={[0, (8 * Math.PI) / 180, 0]}>
-      <mesh position={[0, topY, 0]}>
-        <boxGeometry args={[1.9, topThickness, 0.8]} />
-        <meshLambertMaterial color={PALETTE.desk} />
-      </mesh>
-      {[
-        [-halfW, -halfD],
-        [halfW, -halfD],
-        [-halfW, halfD],
-        [halfW, halfD],
-      ].map(([lx, lz], i) => (
-        <mesh key={i} position={[lx, legHeight / 2, lz]}>
-          <boxGeometry args={[legSize, legHeight, legSize]} />
-          <meshLambertMaterial color={PALETTE.desk} />
-        </mesh>
-      ))}
+      {/* --- Furniture & scenery props (M4) ------------------------------ */}
+      <Desk position={[0.3, 0, -1.2]} rotationY={(8 * Math.PI) / 180} />
+      {/* Chair lives on the operative's side of the desk (facing the
+          visitor) — the visitor side is the camera's dolly corridor. */}
+      <Chair position={[0.55, 0, -1.85]} rotationY={Math.PI + 0.12} />
+      <CeilingFan position={[0, 3.0, -0.8]} />
+      <DeskLamp position={[-0.15, 0.79, -1.35]} rotationY={0.4} />
+      <Clutter />
     </group>
   );
 }

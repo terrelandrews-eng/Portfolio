@@ -14,9 +14,23 @@
 //     perpendicular axis is x, so the spec's (along-wall, h, thin) maps
 //     to (thin, h, along-wall) = (x, y, z).
 
+import type { ReactNode } from 'react';
 import { EXHIBITS } from '../../content/exhibits';
 import type { ExhibitId } from '../../content/types';
 import ExhibitObject from './ExhibitObject';
+import WindowFrame from '../props/WindowFrame';
+import Corkboard from '../props/Corkboard';
+import Bookshelf from '../props/Bookshelf';
+
+// Real M4 prop components for exhibits that have them; the rest keep
+// their gray-box stand-ins until their prop pass lands. Mount positions
+// are the real-world prop origins (base/face centers), not necessarily
+// the marker anchor from exhibits.ts.
+const REAL: Partial<Record<ExhibitId, ReactNode>> = {
+  window: <WindowFrame position={[0.9, 1.7, -2.55]} />,
+  board: <Corkboard position={[-1.5, 1.75, -2.55]} />,
+  shelf: <Bookshelf position={[-3.05, 0, -1.2]} />,
+};
 
 interface PlaceholderSpec {
   size: [number, number, number];
@@ -41,17 +55,20 @@ export default function Placeholders() {
   return (
     <>
       {EXHIBITS.map((def) => {
+        const real = REAL[def.id];
         const spec = SPECS[def.id];
         return (
           <ExhibitObject key={def.id} def={def}>
-            <mesh position={def.anchor}>
-              <boxGeometry args={spec.size} />
-              <meshLambertMaterial
-                color={spec.color}
-                transparent={spec.transparent}
-                opacity={spec.opacity ?? 1}
-              />
-            </mesh>
+            {real ?? (
+              <mesh position={def.anchor}>
+                <boxGeometry args={spec.size} />
+                <meshLambertMaterial
+                  color={spec.color}
+                  transparent={spec.transparent}
+                  opacity={spec.opacity ?? 1}
+                />
+              </mesh>
+            )}
           </ExhibitObject>
         );
       })}
