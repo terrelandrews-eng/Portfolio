@@ -32,6 +32,12 @@ export default function ExhibitObject({ def, children }: ExhibitObjectProps) {
   const found = useAppStore((s) => s.found.includes(def.id));
   const openExhibit = useAppStore((s) => s.openExhibit);
   const introPhase = useAppStore((s) => s.introPhase);
+  const focusId = useAppStore((s) => s.focusId);
+
+  // Markers exist to be aimed at from the seat. The moment the rig leaves
+  // the seat (flight or focus) every ring hides — at dolly distance a ring
+  // is a giant hoop photobombing the prop it was pointing at.
+  const markersVisible = focusId === null && introPhase === 'done';
 
   // Gentle pulse on the marker ring, phase-offset per exhibit so a room
   // full of them doesn't breathe in unison.
@@ -87,14 +93,14 @@ export default function ExhibitObject({ def, children }: ExhibitObjectProps) {
     >
       <group ref={contentRef}>{children}</group>
 
-      <Billboard position={def.anchor}>
+      <Billboard position={def.anchor} visible={markersVisible}>
         <mesh ref={ringRef}>
           <torusGeometry args={[0.09, 0.015, 8, 24]} />
           <meshBasicMaterial color={markerColor} />
         </mesh>
       </Billboard>
 
-      {import.meta.env.DEV && (
+      {import.meta.env.DEV && markersVisible && (
         <Html
           position={[def.anchor[0], def.anchor[1] + 0.15, def.anchor[2]]}
           center

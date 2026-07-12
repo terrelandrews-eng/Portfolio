@@ -178,8 +178,8 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     panelTitle: 'SERVICE RECORD',
     anchor: [-0.35, 0.78, -1.05],
     camera: {
-      pos: [-0.294, 0.83, -0.513],
-      lookAt: [-0.35, 0.78, -1.05],
+      pos: [-0.32, 1.22, -0.62],
+      lookAt: [-0.35, 0.8, -1.05],
     },
     content: {
       kind: 'resume',
@@ -238,8 +238,8 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     panelTitle: 'FIELD OPERATIONS',
     anchor: [0.35, 0.78, -1.25],
     camera: {
-      pos: [0.297, 0.83, -0.712],
-      lookAt: [0.35, 0.78, -1.25],
+      pos: [0.33, 1.04, -0.73],
+      lookAt: [0.35, 0.9, -1.25],
     },
     content: {
       kind: 'projects',
@@ -290,8 +290,8 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     panelTitle: 'SECURE LINE',
     anchor: [0.85, 0.78, -0.95],
     camera: {
-      pos: [0.714, 0.83, -0.428],
-      lookAt: [0.85, 0.78, -0.95],
+      pos: [0.6, 1.12, -0.5],
+      lookAt: [0.85, 0.86, -0.95],
     },
     content: {
       kind: 'contact',
@@ -409,8 +409,8 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     panelTitle: "FREQ 94.7 — THE AGENT'S FREQUENCY",
     anchor: [1.05, 0.78, -1.35],
     camera: {
-      pos: [0.9, 0.83, -0.829],
-      lookAt: [1.05, 0.78, -1.35],
+      pos: [0.82, 1.1, -0.83],
+      lookAt: [1.05, 0.87, -1.35],
     },
     content: {
       kind: 'radio',
@@ -429,10 +429,10 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     label: 'THE MUG',
     panelKicker: 'EXHIBIT I — THE MUG',
     panelTitle: 'STANDARD ISSUE',
-    anchor: [1.3, 0.78, -1.0],
+    anchor: [1.12, 0.78, -1.0],
     camera: {
-      pos: [1.102, 0.83, -0.497],
-      lookAt: [1.3, 0.78, -1.0],
+      pos: [1.0, 1.08, -0.55],
+      lookAt: [1.12, 0.84, -1.0],
     },
     content: {
       kind: 'mug',

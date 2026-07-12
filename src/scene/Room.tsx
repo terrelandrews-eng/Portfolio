@@ -37,13 +37,16 @@ export default function Room() {
   return (
     <group>
       {/* --- Lighting (temporary; M5 owns final lighting) ------------ */}
-      <ambientLight color={PALETTE.wall} intensity={0.6} />
+      <ambientLight color={PALETTE.wall} intensity={0.85} />
       <directionalLight
         color="#FBE3AE"
         position={[0.9, 2.2, -1]}
         intensity={1.2}
       />
-      <pointLight color={PALETTE.marker} position={[0.1, 1.05, -1.15]} intensity={1.2} distance={4} />
+      <pointLight color={PALETTE.marker} position={[0.35, 1.15, -1.1]} intensity={1.6} distance={5} />
+      {/* Dim warm fill for the right wall so the photo string reads at its
+          dolly; M5 replaces all of this. */}
+      <pointLight color={PALETTE.lampGlow} position={[2.4, 2.0, -0.2]} intensity={0.5} distance={3.5} />
 
       {/* --- Floor ----------------------------------------------------- */}
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>

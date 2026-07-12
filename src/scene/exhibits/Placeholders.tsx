@@ -21,15 +21,32 @@ import ExhibitObject from './ExhibitObject';
 import WindowFrame from '../props/WindowFrame';
 import Corkboard from '../props/Corkboard';
 import Bookshelf from '../props/Bookshelf';
+import Journal from '../props/Journal';
+import Laptop from '../props/Laptop';
+import RotaryPhone from '../props/RotaryPhone';
+import Radio from '../props/Radio';
+import Mug from '../props/Mug';
+import PhotoString from '../props/PhotoString';
 
-// Real M4 prop components for exhibits that have them; the rest keep
-// their gray-box stand-ins until their prop pass lands. Mount positions
+// Real M4 prop components for exhibits that have them. Mount positions
 // are the real-world prop origins (base/face centers), not necessarily
 // the marker anchor from exhibits.ts.
+//
+// Desk props sit at y=0.79 (desk surface). The desk itself is rotated
+// 8° (~0.14 rad); each desk item gets a rotationY near that, with a
+// little deliberate variance so the desk doesn't read as grid-aligned.
+// PhotoString mounts at the right wall's inner face (x=3.15 minus a
+// hair), not at its marker anchor, so the nails sit ON the wall.
 const REAL: Partial<Record<ExhibitId, ReactNode>> = {
   window: <WindowFrame position={[0.9, 1.7, -2.55]} />,
   board: <Corkboard position={[-1.5, 1.75, -2.55]} />,
   shelf: <Bookshelf position={[-3.05, 0, -1.2]} />,
+  journal: <Journal position={[-0.35, 0.79, -1.05]} rotationY={0.32} />,
+  laptop: <Laptop position={[0.35, 0.79, -1.25]} rotationY={0.14} />,
+  phone: <RotaryPhone position={[0.85, 0.79, -0.95]} rotationY={-0.2} />,
+  radio: <Radio position={[1.05, 0.79, -1.35]} rotationY={-0.25} />,
+  mug: <Mug position={[1.12, 0.79, -1.0]} rotationY={0.15} />,
+  photos: <PhotoString position={[3.14, 1.9, -0.8]} />,
 };
 
 interface PlaceholderSpec {
