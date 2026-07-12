@@ -81,15 +81,15 @@ const DOF_BOKEH_SCALE = 0.9;
 // Where the corner darkening begins (0 = from center, 1 = only extreme
 // corners). RAISE to push the dark ring outward and free the screen edges
 // where exhibit markers can sit; LOWER to pull shadow further toward center.
-const VIGNETTE_OFFSET = 0.32;
+const VIGNETTE_OFFSET = 0.42;
 // Strength of the corner darkening. RAISE for heavier noir falloff; LOWER
 // so corner content (edge markers) is not crushed to black.
-const VIGNETTE_DARKNESS = 0.55;
+const VIGNETTE_DARKNESS = 0.28;
 
 // --- Noise (film grain) ----------------------------------------------------
 // Grain opacity. Deliberately tiny so it reads as film texture, not TV
 // static. RAISE for a grittier, grainier image; LOWER toward 0 to clean up.
-const NOISE_OPACITY = 0.045;
+const NOISE_OPACITY = 0.028;
 // premultiply multiplies the grain by the underlying color, so shadows stay
 // cleaner and grain lives mostly in the lit/mid areas — the filmic look.
 const NOISE_PREMULTIPLY = true;

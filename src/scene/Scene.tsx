@@ -14,7 +14,9 @@ export default function Scene() {
   return (
     <>
       <color attach="background" args={[colors.bg]} />
-      <fogExp2 attach="fog" args={[colors.bg, 0.045]} />
+      {/* Day grade: distance fades toward bright haze, not noir black,
+          and much less of it — the room should read clean at midday. */}
+      <fogExp2 attach="fog" args={['#c3dde4', 0.022]} />
       {/* The rig owns the camera every frame (position + look): idle drift,
           fly-to/return dollies, mouse-look. Replaces the old one-shot aim. */}
       <CameraRig />

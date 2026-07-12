@@ -7,29 +7,33 @@
 
 import * as THREE from 'three';
 
+// BRIGHT-DAY GRADE (2026-07-12): scene direction changed from dusk noir
+// to a bright Caribbean day. Interior woods lifted toward sun-warmed
+// tones, paper back to full brightness, and the outside-the-window group
+// regraded to daylight (turquoise sea, high blue sky, green palms).
 export const PALETTE = {
   // room shell
-  floor: '#5a4632', // wood-brown floor planks
-  wall: '#22333b', // desaturated teal-gray plank walls
-  wallDark: '#152026', // ceiling / recessed segments / shadowed wood
-  trim: '#2e3f47', // window/door frames, skirting — lighter than wall
+  floor: '#8a6e4b', // sun-warmed wood floor planks
+  wall: '#4e6d76', // driftwood teal plank walls, daylight
+  wallDark: '#4a656e', // ceiling / recessed segments / shadowed wood
+  trim: '#6a8893', // window/door frames, skirting — lighter than wall
 
   // furniture woods
-  desk: '#3e2a1c', // desk + shelf carcass, dark tropical wood
-  woodLight: '#6b5138', // chair, crate, lighter worked wood
-  woodRed: '#4a2f22', // journal cover, radio cabinet, warm red-brown
+  desk: '#5e4025', // desk + shelf carcass, tropical wood in daylight
+  woodLight: '#96754e', // chair, crate, lighter worked wood
+  woodRed: '#7a4a33', // journal cover, radio cabinet, warm red-brown
 
   // paper / fabric
-  paper: '#d8d0ba', // documents, polaroid frames (scene-dimmed EDE6D2)
-  paperShadow: '#a89f88', // paper in shadow, map, cork cards
-  cork: '#8a6a45', // corkboard surface
-  fabric: '#7a3b2e', // rug, pennant — muted rust red
-  plant: '#3f5a38', // palm/plant greens
-  plantDark: '#2b3f28',
+  paper: '#EDE6D2', // documents, polaroid frames (full theme paper)
+  paperShadow: '#c4baa2', // paper in shadow, map, cork cards
+  cork: '#b08a58', // corkboard surface
+  fabric: '#a04d3a', // rug, pennant — rust red in daylight
+  plant: '#5d8452', // palm/plant greens
+  plantDark: '#3f5c3a',
 
   // metals / hardware
-  metalDark: '#1c2226', // phone body, lamp arm, fan hardware, bakelite
-  metalWarm: '#8a6f3c', // brass knobs, clothespins, lamp shade inner
+  metalDark: '#2a3238', // phone body, lamp arm, fan hardware, bakelite
+  metalWarm: '#b3904e', // brass knobs, clothespins, lamp shade inner
 
   // emissives / accents
   marker: '#E8B54A', // amber exhibit marker + dial glow (theme amber)
@@ -37,13 +41,13 @@ export const PALETTE = {
   screenDark: '#0E1B14', // laptop screen ground
   lampGlow: '#f0c060', // lamp bulb / warm emissive
 
-  // outside the window
-  sky: '#2c5f6f', // dusk sky
-  skyHigh: '#1a3d4a', // upper sky, deeper
-  sea: '#1f4a56', // sea plane
-  seaFoam: '#4f8896', // wave highlights / horizon shimmer
-  sand: '#b09a6f', // beach strip
-  silhouette: '#0d1a1e', // palms, sailboat, distant shapes
+  // outside the window — bright day
+  sky: '#9FDCEC', // horizon sky, hazy bright blue
+  skyHigh: '#4FA8D8', // upper sky, saturated day blue
+  sea: '#1FA3B8', // turquoise Caribbean sea
+  seaFoam: '#D8F4F4', // wave highlights / foam, near-white
+  sand: '#EBDCA8', // bright beach strip
+  silhouette: '#2f6b52', // palms and distant shapes — deep green, not black
 } as const;
 
 export type PaletteKey = keyof typeof PALETTE;

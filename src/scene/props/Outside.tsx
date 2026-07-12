@@ -1,7 +1,10 @@
-// The world outside the beach-shack window — a layered dusk seascape seen
-// through the 1.6 x 1.1 m opening centered at world (0.9, 1.7) on the back
-// wall (z = -2.55). Stylized low-poly noir, flat-shaded, code-authored
-// geometry only. All materials come from ../materials — no inline colors.
+// The world outside the beach-shack window — a layered BRIGHT CARIBBEAN
+// MIDDAY seascape seen through the 1.6 x 1.1 m opening centered at world
+// (0.9, 1.7) on the back wall (z = -2.55). Stylized low-poly, flat-shaded,
+// code-authored geometry only. All materials come from ../materials — no
+// inline colors. The palette was regraded to day values by the
+// orchestrator: skyHigh = saturated day blue, sky = pale horizon haze,
+// sea = turquoise, seaFoam = near-white, silhouette = deep foliage green.
 // Backdrop surfaces use backdropMat (unlit MeshBasicMaterial): no scene
 // light reaches past the back wall, so lit Lambert materials would render
 // black out there. Only the sun disc uses emissiveMat.
@@ -18,12 +21,15 @@
 // the backdrop is ever visible through the frame from either viewpoint.
 //
 // SKY GRADIENT: faked with two stacked overlapping planes at slightly
-// different depths (skyHigh behind, a lighter/warmer `sky` band drawn over
-// the lower third near the horizon) — NO canvas texture is used at all
-// (flagged in report). This keeps the prop texture-free and cheap.
+// different depths — the saturated skyHigh plane fills the whole backdrop
+// and the pale `sky` haze band overlays the lower stretch at a slightly
+// nearer depth, so the sky reads deep blue up top fading to haze at the
+// horizon (the correct orientation for midday). NO canvas texture is used
+// at all (flagged in report).
 //
-// Palette keys used: skyHigh, sky, lampGlow (sun), sea, seaFoam, sand,
-// silhouette. All present in materials.ts.
+// Palette keys used: skyHigh, sky, lampGlow (sun), sea, seaFoam (foam
+// lines, sail canvas, clouds), sand, silhouette (foliage-green shapes).
+// All present in materials.ts.
 
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -55,6 +61,7 @@ const HORIZON_Y = 1.38; // sea/sky meet just above window-center height
 const SKY_Z = -6.95;
 const SKY_LOW_Z = -6.85;
 const SUN_Z = -6.7;
+const CLOUD_Z = -6.6;
 const SEA_Z = -5.95;
 const FOAM_Z = -5.9;
 const SAND_Z = -4.3;
@@ -80,13 +87,37 @@ interface FoamSpec {
   phase: number;
 }
 
-// Lower strips are longer/thicker (nearer), higher strips thinner (farther).
+// Lower strips are longer/thicker (nearer), higher strips thinner
+// (farther). Day pass: near-white seaFoam on turquoise is high contrast,
+// so the strips are thinner and shorter than the dusk composition —
+// broken glints that read as sun sparkle, not full-width stripes.
 const FOAM: FoamSpec[] = [
-  { x: 1.4, y: HORIZON_Y - 0.06, w: 3.4, h: 0.02, amp: 0.03, speed: 0.9, phase: 0.0 },
-  { x: 0.6, y: HORIZON_Y - 0.16, w: 4.2, h: 0.025, amp: 0.04, speed: 0.75, phase: 1.3 },
-  { x: 1.6, y: HORIZON_Y - 0.3, w: 4.8, h: 0.03, amp: 0.05, speed: 0.85, phase: 2.6 },
-  { x: 0.9, y: HORIZON_Y - 0.5, w: 5.4, h: 0.035, amp: 0.05, speed: 0.7, phase: 0.7 },
-  { x: 1.2, y: HORIZON_Y - 0.75, w: 5.8, h: 0.045, amp: 0.06, speed: 0.8, phase: 3.4 },
+  { x: 1.6, y: HORIZON_Y - 0.06, w: 2.0, h: 0.013, amp: 0.03, speed: 0.9, phase: 0.0 },
+  { x: 0.4, y: HORIZON_Y - 0.16, w: 2.6, h: 0.016, amp: 0.04, speed: 0.75, phase: 1.3 },
+  { x: 2.0, y: HORIZON_Y - 0.3, w: 2.8, h: 0.019, amp: 0.05, speed: 0.85, phase: 2.6 },
+  { x: 0.7, y: HORIZON_Y - 0.5, w: 3.2, h: 0.023, amp: 0.05, speed: 0.7, phase: 0.7 },
+  { x: 1.3, y: HORIZON_Y - 0.75, w: 3.6, h: 0.03, amp: 0.06, speed: 0.8, phase: 3.4 },
+];
+
+// --- Clouds: two flat white puffs, each a cluster of flattened sphere
+// instances (one instancedMesh total, static). Placed so from the seat one
+// sits upper-left in the window and one in the top-right corner, clear of
+// the high sun.
+interface CloudPuff {
+  x: number;
+  y: number;
+  sx: number;
+  sy: number;
+}
+
+const CLOUDS: CloudPuff[] = [
+  // cloud A (upper-left of the view)
+  { x: 0.45, y: 2.58, sx: 0.34, sy: 0.1 },
+  { x: 0.72, y: 2.64, sx: 0.26, sy: 0.09 },
+  { x: 0.28, y: 2.64, sx: 0.2, sy: 0.07 },
+  // cloud B (top-right corner)
+  { x: 2.95, y: 2.84, sx: 0.4, sy: 0.11 },
+  { x: 3.25, y: 2.9, sx: 0.24, sy: 0.08 },
 ];
 
 // --- Palm crown fronds: flattened drooping blades radiating from the top ---
@@ -98,6 +129,7 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
 
   const foamRef = useRef<THREE.InstancedMesh>(null);
   const frondRef = useRef<THREE.InstancedMesh>(null);
+  const cloudRef = useRef<THREE.InstancedMesh>(null);
 
   // Palm trunk: a gently S-bent tube leaning up and to the right, so from
   // the seat it rises out of the beach into the window's left third.
@@ -137,10 +169,13 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
     });
   }, []);
 
-  // All static `silhouette` shapes merged into one geometry: the distant
-  // headland lump, the palm trunk tube, and the sailboat (hull + mast +
-  // sail, baked through the boat sub-group offset). One draw call. The palm
-  // fronds and foam strips stay instanced (still animate on the full tier).
+  // All static `silhouette`-keyed shapes merged into one geometry: the
+  // distant headland lump, the palm trunk tube, and the sailboat hull +
+  // mast (baked through the boat sub-group offset). One draw call. Day
+  // pass: the SAIL is split OUT of this merge — in daylight the shapes are
+  // deep foliage green, and a green sail reads wrong, so the sail is its
+  // own mesh with seaFoam (near-white canvas). The palm fronds and foam
+  // strips stay instanced (foam still animates on the full tier).
   const silhouetteGeo = useMemo(() => {
     const parts: THREE.BufferGeometry[] = [];
     parts.push(
@@ -154,9 +189,19 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
     parts.push(
       new THREE.CylinderGeometry(0.008, 0.008, 0.2, 5).applyMatrix4(boat.clone().multiply(composeM([0, 0.11, 0]))),
     );
-    parts.push(new THREE.ShapeGeometry(sailShape).applyMatrix4(boat.clone().multiply(composeM([0.06, 0.11, 0]))));
     return mergeGeometries(parts);
   }, [trunkCurve]);
+
+  // Static cloud puff matrices (flattened spheres, two clusters).
+  const cloudMatrices = useMemo(() => {
+    return CLOUDS.map((c) => {
+      dummy.position.set(c.x, c.y, CLOUD_Z);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(c.sx, c.sy, 0.05);
+      dummy.updateMatrix();
+      return dummy.matrix.clone();
+    });
+  }, []);
 
   useLayoutEffect(() => {
     if (frondRef.current) {
@@ -167,7 +212,11 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
       foamBase.forEach((m, i) => foamRef.current!.setMatrixAt(i, m));
       foamRef.current.instanceMatrix.needsUpdate = true;
     }
-  }, [frondMatrices, foamBase]);
+    if (cloudRef.current) {
+      cloudMatrices.forEach((m, i) => cloudRef.current!.setMatrixAt(i, m));
+      cloudRef.current.instanceMatrix.needsUpdate = true;
+    }
+  }, [frondMatrices, foamBase, cloudMatrices]);
 
   // Slow lateral shimmer of the foam strips (period ~7-9s). Static when the
   // quality tier is 'reduced' — we simply leave the base matrices in place.
@@ -187,8 +236,8 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
 
   return (
     <group position={position}>
-      {/* (a) SKY — deep upper plane, then a lighter warm band over the lower
-          third to fake a dusk vertical gradient (no texture). */}
+      {/* (a) SKY — saturated day-blue plane behind, pale haze band over the
+          lower stretch to fake the midday vertical gradient (no texture). */}
       <mesh position={[VIEW_CX, 1.7, SKY_Z]} material={backdropMat('skyHigh')}>
         <planeGeometry args={[BACKDROP_W, 3.6]} />
       </mesh>
@@ -196,10 +245,21 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
         <planeGeometry args={[BACKDROP_W, 1.25]} />
       </mesh>
 
-      {/* Low dusk sun disc — subtle warm emissive, sitting right of center. */}
-      <mesh position={[2.5, 1.95, SUN_Z]} material={emissiveMat('lampGlow', 0.5)}>
-        <circleGeometry args={[0.26, 24]} />
+      {/* High midday sun — smaller and hotter than the old dusk disc. From
+          the seat it lands in the window's upper third, right of center
+          (~(1.02, 2.18) on the wall plane). Intensity 1.5 so it blooms. */}
+      <mesh position={[1.9, 2.8, SUN_Z]} material={emissiveMat('lampGlow', 1.5)}>
+        <circleGeometry args={[0.18, 24]} />
       </mesh>
+
+      {/* White cloud puffs (instanced flattened spheres, static). */}
+      <instancedMesh
+        ref={cloudRef}
+        args={[undefined, undefined, CLOUDS.length]}
+        material={backdropMat('seaFoam')}
+      >
+        <sphereGeometry args={[1, 8, 5]} />
+      </instancedMesh>
 
       {/* (b) SEA — plane from the horizon down toward the wall. */}
       <mesh position={[VIEW_CX, HORIZON_Y - 0.75, SEA_Z]} material={backdropMat('sea')}>
@@ -216,10 +276,17 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
         <planeGeometry args={[3.6, 0.5]} />
       </mesh>
 
-      {/* (d) SILHOUETTES ------------------------------------------------- */}
-      {/* Distant headland + hero palm trunk + sailboat (hull/mast/sail),
-          all `silhouette`, merged into one geometry — a single draw call. */}
+      {/* (d) FOLIAGE-GREEN SHAPES ---------------------------------------- */}
+      {/* Distant headland + hero palm trunk + sailboat hull/mast, all
+          `silhouette` (now deep green), merged — a single draw call. */}
       <mesh geometry={silhouetteGeo} material={backdropMat('silhouette')} />
+
+      {/* Sail split out of the merge for the day pass: near-white canvas
+          (seaFoam) instead of foliage green. Position = boat group offset
+          (2.2, HORIZON_Y - 0.02, BOAT_Z) + local sail offset (0.06, 0.11). */}
+      <mesh position={[2.26, HORIZON_Y + 0.09, BOAT_Z]} material={backdropMat('seaFoam')}>
+        <shapeGeometry args={[sailShape]} />
+      </mesh>
 
       {/* Palm fronds — flattened drooping blades (instanced planes). The
           plane geometry is shifted so its base sits at the crown pivot. */}

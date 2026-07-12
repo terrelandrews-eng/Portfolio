@@ -76,7 +76,7 @@ const FROND_CONFIG: { pitch: number; mat: 'plant' | 'plantDark' }[] = [
 // --- (c) Pennant flag — right wall, facing -X ---------------------------
 // x pinned to the right wall's inner face (3.15) minus a hair — at the
 // spec'd 2.9 the flag floated 25cm into the room and read as an artifact.
-const FLAG_ANCHOR: [number, number, number] = [3.13, 2.2, -1.8];
+const FLAG_ANCHOR: [number, number, number] = [3.13, 1.9, -2.15];
 const ROD_LEN = 0.3;
 
 // --- (d) Scattered desk papers -------------------------------------------
