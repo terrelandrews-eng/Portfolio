@@ -14,9 +14,14 @@
 //   pages      -> `paper`    (two curved page blocks, extruded cross-section)
 //   ink lines  -> `wallDark` (flattened dark boxes = abstract handwriting)
 //   ribbon     -> `fabric`   (bookmark draping over the front edge)
+//
+// Mesh budget: same-material static pieces are merged so each material is a
+// single draw call — woodRed (cover + spine), paper (both page blocks), the
+// 3 wallDark ink lines, and the 2 fabric ribbon segments. 9 meshes -> 4.
 
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat } from '../materials';
 
 interface PropProps {
@@ -52,6 +57,22 @@ const INK_LINES: { z: number; w: number }[] = [
 ];
 const INK_X = 0.1; // near the page peak, mid-to-outer on the right page
 
+// Bake a mesh's local transform into a fresh geometry and collect it, so a
+// set of same-material parts can be merged into one draw call.
+function bakeInto(
+  parts: THREE.BufferGeometry[],
+  geo: THREE.BufferGeometry,
+  pos: [number, number, number],
+  rot: [number, number, number] = [0, 0, 0],
+) {
+  const m = new THREE.Matrix4().compose(
+    new THREE.Vector3(pos[0], pos[1], pos[2]),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+    new THREE.Vector3(1, 1, 1),
+  );
+  parts.push(geo.applyMatrix4(m));
+}
+
 export default function Journal({ position = [0, 0, 0], rotationY = 0 }: PropProps) {
   // One page block, built once and shared by both pages. The 2D cross-section
   // lives in the XY plane (X = across the page, Y = up); ExtrudeGeometry then
@@ -80,65 +101,52 @@ export default function Journal({ position = [0, 0, 0], rotationY = 0 }: PropPro
     return geom;
   }, []);
 
+  // woodRed — cover slab + spine ridge.
+  const coverGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    bakeInto(parts, new THREE.BoxGeometry(COVER_W, COVER_T, COVER_D), [0, COVER_T / 2, 0]);
+    bakeInto(parts, new THREE.BoxGeometry(SPINE_W, SPINE_H, COVER_D * 0.96), [0, COVER_T + SPINE_H / 2 - 0.006, 0]);
+    return mergeGeometries(parts);
+  }, []);
+
+  // paper — both page blocks (left is the same block spun 180deg about Y).
+  const pagesGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    bakeInto(parts, pageGeometry.clone(), [GUTTER_GAP, COVER_T, 0]);
+    bakeInto(parts, pageGeometry.clone(), [-GUTTER_GAP, COVER_T, 0], [0, Math.PI, 0]);
+    return mergeGeometries(parts);
+  }, [pageGeometry]);
+
+  // wallDark — the 3 ink lines near the right-page crest.
+  const inkGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    INK_LINES.forEach((line) =>
+      bakeInto(parts, new THREE.BoxGeometry(line.w, 0.0015, 0.004), [INK_X, COVER_T + PEAK_H - 0.001, line.z]),
+    );
+    return mergeGeometries(parts);
+  }, []);
+
+  // fabric — the 2 ribbon segments (flat length + draping tail).
+  const ribbonGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    bakeInto(parts, new THREE.BoxGeometry(0.02, 0.002, 0.21), [0.016, COVER_T + 0.011, 0.02]);
+    bakeInto(parts, new THREE.BoxGeometry(0.02, 0.002, 0.12), [0.016, 0.009, 0.19], [0.3, 0, 0]);
+    return mergeGeometries(parts);
+  }, []);
+
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Leather cover — thin slab, sits on the desk */}
-      <mesh position={[0, COVER_T / 2, 0]} material={flatMat('woodRed')} castShadow receiveShadow>
-        <boxGeometry args={[COVER_W, COVER_T, COVER_D]} />
-      </mesh>
+      {/* Leather cover + spine ridge, merged woodRed — one draw call */}
+      <mesh geometry={coverGeo} material={flatMat('woodRed')} castShadow receiveShadow />
 
-      {/* Spine ridge — raised bar showing through the gutter gap */}
-      <mesh position={[0, COVER_T + SPINE_H / 2 - 0.006, 0]} material={flatMat('woodRed')} castShadow>
-        <boxGeometry args={[SPINE_W, SPINE_H, COVER_D * 0.96]} />
-      </mesh>
+      {/* Both pages, merged paper — one draw call */}
+      <mesh geometry={pagesGeo} material={flatMat('paper')} castShadow receiveShadow />
 
-      {/* Right page — gutter edge just off center */}
-      <mesh
-        geometry={pageGeometry}
-        position={[GUTTER_GAP, COVER_T, 0]}
-        material={flatMat('paper')}
-        castShadow
-        receiveShadow
-      />
+      {/* Ink lines, merged wallDark — one draw call */}
+      <mesh geometry={inkGeo} material={flatMat('wallDark')} />
 
-      {/* Left page — same block, spun 180deg about Y so it splays to -X */}
-      <mesh
-        geometry={pageGeometry}
-        position={[-GUTTER_GAP, COVER_T, 0]}
-        rotation={[0, Math.PI, 0]}
-        material={flatMat('paper')}
-        castShadow
-        receiveShadow
-      />
-
-      {/* Ink lines — flattened dark boxes lying near the right-page crest */}
-      {INK_LINES.map((line, i) => (
-        <mesh
-          key={i}
-          position={[INK_X, COVER_T + PEAK_H - 0.001, line.z]}
-          material={flatMat('wallDark')}
-        >
-          <boxGeometry args={[line.w, 0.0015, 0.004]} />
-        </mesh>
-      ))}
-
-      {/* Ribbon bookmark — one length lying along the gutter toward the front
-          edge, and a draping tail spilling over the edge onto the desk */}
-      <mesh
-        position={[0.016, COVER_T + 0.011, 0.02]}
-        material={flatMat('fabric')}
-        castShadow
-      >
-        <boxGeometry args={[0.02, 0.002, 0.21]} />
-      </mesh>
-      <mesh
-        position={[0.016, 0.009, 0.19]}
-        rotation={[0.3, 0, 0]}
-        material={flatMat('fabric')}
-        castShadow
-      >
-        <boxGeometry args={[0.02, 0.002, 0.12]} />
-      </mesh>
+      {/* Ribbon bookmark (both segments), merged fabric — one draw call */}
+      <mesh geometry={ribbonGeo} material={flatMat('fabric')} castShadow />
     </group>
   );
 }

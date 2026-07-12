@@ -14,7 +14,15 @@
 // exterior), `metalWarm` for the shade interior, `emissiveMat('lampGlow')`
 // for the bulb — all from the shared palette (materials.ts). No inline
 // colors.
+//
+// Mesh budget: the 5 `metalDark` body parts (base, post, knuckle, arm,
+// outer shade shell) are merged into ONE BufferGeometry — a single draw
+// call for the lamp body. The `metalWarm` inner shade and the emissive bulb
+// disc keep their own meshes (different materials). 7 meshes -> 3.
 
+import { useMemo } from 'react';
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat, emissiveMat } from '../materials';
 
 const BASE_RADIUS = 0.1;
@@ -56,32 +64,36 @@ interface PropProps {
 }
 
 export default function DeskLamp({ position = [0, 0, 0], rotationY = 0 }: PropProps) {
+  // Merge the 5 `metalDark` body parts (base, post, knuckle, arm, outer
+  // shade shell) into one geometry — a single draw call for the lamp body.
+  // Each part's local transform is baked into its geometry.
+  const body = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    const bake = (
+      geo: THREE.BufferGeometry,
+      pos: [number, number, number],
+      rot: [number, number, number] = [0, 0, 0],
+    ) => {
+      const m = new THREE.Matrix4().compose(
+        new THREE.Vector3(pos[0], pos[1], pos[2]),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+        new THREE.Vector3(1, 1, 1),
+      );
+      parts.push(geo.applyMatrix4(m));
+    };
+    bake(new THREE.CylinderGeometry(BASE_RADIUS, BASE_RADIUS * 1.05, BASE_HEIGHT, 12), [0, BASE_Y, 0]);
+    bake(new THREE.CylinderGeometry(POST_RADIUS, POST_RADIUS, POST_HEIGHT, 8), [0, POST_Y, 0]);
+    bake(new THREE.SphereGeometry(KNUCKLE_RADIUS, 6, 5), [0, POST_TOP_Y, 0]);
+    bake(new THREE.CylinderGeometry(0.012, 0.012, ARM_LEN, 6), ARM_CENTER, [ARM_ANGLE, 0, 0]);
+    bake(new THREE.CylinderGeometry(0.02, 0.105, 0.15, 10, 1, true), SHADE_POS, [SHADE_TILT, 0, 0]);
+    return mergeGeometries(parts);
+  }, []);
+
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Weighted round base */}
-      <mesh position={[0, BASE_Y, 0]} material={flatMat('metalDark')} castShadow receiveShadow>
-        <cylinderGeometry args={[BASE_RADIUS, BASE_RADIUS * 1.05, BASE_HEIGHT, 12]} />
-      </mesh>
-
-      {/* Riser post */}
-      <mesh position={[0, POST_Y, 0]} material={flatMat('metalDark')} castShadow>
-        <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, POST_HEIGHT, 8]} />
-      </mesh>
-
-      {/* Pivot knuckle at the top of the post */}
-      <mesh position={[0, POST_TOP_Y, 0]} material={flatMat('metalDark')} castShadow>
-        <sphereGeometry args={[KNUCKLE_RADIUS, 6, 5]} />
-      </mesh>
-
-      {/* Single angled arm segment, up and toward +Z */}
-      <mesh position={ARM_CENTER} rotation={[ARM_ANGLE, 0, 0]} material={flatMat('metalDark')} castShadow>
-        <cylinderGeometry args={[0.012, 0.012, ARM_LEN, 6]} />
-      </mesh>
-
-      {/* Shade — outer shell */}
-      <mesh position={SHADE_POS} rotation={[SHADE_TILT, 0, 0]} material={flatMat('metalDark')} castShadow>
-        <cylinderGeometry args={[0.02, 0.105, 0.15, 10, 1, true]} />
-      </mesh>
+      {/* Merged `metalDark` body: base, post, knuckle, arm, outer shade
+          shell — one geometry, one draw call. */}
+      <mesh geometry={body} material={flatMat('metalDark')} castShadow receiveShadow />
 
       {/* Shade — inner surface, nested slightly smaller so it reads through
           the open mouth and from below (the painted-interior look) */}

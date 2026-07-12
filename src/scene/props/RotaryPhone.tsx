@@ -23,12 +23,30 @@
 // value and reads as the recessed dial holes; flagged as a near-match, not
 // an exact "hole black". No new colors were needed.
 //
-// Budget: 9 plain meshes + 1 InstancedMesh (holes); ~1.5k tris. The cord
+// Budget: the 7 static `metalDark` parts (body bell, 2 cradle posts, grip
+// bar, 2 handset cups, cord tube) are merged into ONE BufferGeometry, and
+// the 2 `metalWarm` dial parts into another — so the phone draws as 2 plain
+// meshes + 1 InstancedMesh (holes) instead of 9 + 1. ~1.5k tris. The cord
 // tube (64x5) and the lathe bell are the spenders.
 
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat } from '../materials';
+
+// Compose a TRS matrix from plain-array pos/rotation/scale (Euler XYZ, to
+// match r3f's default) so a mesh's JSX transform can be baked into geometry.
+function composeM(
+  pos: [number, number, number],
+  rot: [number, number, number] = [0, 0, 0],
+  scl: [number, number, number] = [1, 1, 1],
+) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(pos[0], pos[1], pos[2]),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+    new THREE.Vector3(scl[0], scl[1], scl[2]),
+  );
+}
 
 // ---- Body lathe profile (radius x, height y), bottom -> top. Caps at
 // x = 0 at both ends so the bell is a closed solid, not an open tube.
@@ -137,32 +155,62 @@ export default function RotaryPhone({ position = [0, 0, 0], rotationY = 0 }: Pro
     }
   }, [holeMatrices]);
 
+  // All static `metalDark` parts merged into one geometry: body bell, the 2
+  // cradle posts, the handset (grip + 2 cups, baked through the handset
+  // sub-group offset), and the cord tube. One draw call.
+  const bodyGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(new THREE.LatheGeometry(bodyPoints, 14));
+    parts.push(
+      new THREE.CylinderGeometry(0.01, 0.011, 0.026, 6).applyMatrix4(composeM([-POST_X, BODY_TOP_Y - 0.002, 0])),
+    );
+    parts.push(
+      new THREE.CylinderGeometry(0.01, 0.011, 0.026, 6).applyMatrix4(composeM([POST_X, BODY_TOP_Y - 0.002, 0])),
+    );
+    // Handset sub-group offset, composed with each child's local transform.
+    const handset = composeM([0, HANDSET_Y, HANDSET_Z]);
+    parts.push(
+      new THREE.TorusGeometry(GRIP_R, 0.011, 6, 10, GRIP_ARC).applyMatrix4(
+        handset.clone().multiply(composeM([0, GRIP_Y_OFF, 0], [0, 0, Math.PI / 2 - GRIP_ARC / 2])),
+      ),
+    );
+    parts.push(
+      new THREE.SphereGeometry(0.024, 8, 6).applyMatrix4(
+        handset.clone().multiply(composeM([-0.05, -0.012, 0], [0, 0, 0], [1.1, 0.7, 1])),
+      ),
+    );
+    parts.push(
+      new THREE.SphereGeometry(0.024, 8, 6).applyMatrix4(
+        handset.clone().multiply(composeM([0.05, -0.012, 0], [0, 0, 0], [1.1, 0.7, 1])),
+      ),
+    );
+    parts.push(new THREE.TubeGeometry(cordCurve, 64, 0.006, 5, false));
+    return mergeGeometries(parts);
+  }, [bodyPoints, cordCurve]);
+
+  // The 2 warm dial parts (face disc + center hub) merged into one geometry.
+  const dialGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(
+      new THREE.CylinderGeometry(DIAL_RADIUS, DIAL_RADIUS, DIAL_THICK, 16).applyMatrix4(
+        composeM(DIAL_POS, [Math.PI / 2, 0, 0]),
+      ),
+    );
+    parts.push(
+      new THREE.CylinderGeometry(0.016, 0.016, 0.02, 12).applyMatrix4(
+        composeM([DIAL_POS[0], DIAL_POS[1], DIAL_POS[2] + 0.012], [Math.PI / 2, 0, 0]),
+      ),
+    );
+    return mergeGeometries(parts);
+  }, []);
+
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Body — bakelite bell, code-authored lathe profile. */}
-      <mesh material={flatMat('metalDark')} castShadow receiveShadow>
-        <latheGeometry args={[bodyPoints, 14]} />
-      </mesh>
+      {/* Body + cradle posts + handset + cord, merged metalDark — 1 draw. */}
+      <mesh geometry={bodyGeo} material={flatMat('metalDark')} castShadow receiveShadow />
 
-      {/* Dial — warm disc on the front slope, facing +Z. */}
-      <mesh
-        position={DIAL_POS}
-        rotation={[Math.PI / 2, 0, 0]}
-        material={flatMat('metalWarm')}
-        castShadow
-      >
-        <cylinderGeometry args={[DIAL_RADIUS, DIAL_RADIUS, DIAL_THICK, 16]} />
-      </mesh>
-
-      {/* Dial center hub, slightly proud of the face. */}
-      <mesh
-        position={[DIAL_POS[0], DIAL_POS[1], DIAL_POS[2] + 0.012]}
-        rotation={[Math.PI / 2, 0, 0]}
-        material={flatMat('metalWarm')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.016, 0.016, 0.02, 12]} />
-      </mesh>
+      {/* Dial face + center hub, merged metalWarm — 1 draw. */}
+      <mesh geometry={dialGeo} material={flatMat('metalWarm')} castShadow />
 
       {/* Finger holes — one InstancedMesh, a ring of dark cylinders. */}
       <instancedMesh
@@ -172,62 +220,6 @@ export default function RotaryPhone({ position = [0, 0, 0], rotationY = 0 }: Pro
       >
         <cylinderGeometry args={[0.006, 0.006, 0.014, 6]} />
       </instancedMesh>
-
-      {/* Cradle posts — two short cylinders the handset rests on. */}
-      <mesh
-        position={[-POST_X, BODY_TOP_Y - 0.002, 0]}
-        material={flatMat('metalDark')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.01, 0.011, 0.026, 6]} />
-      </mesh>
-      <mesh
-        position={[POST_X, BODY_TOP_Y - 0.002, 0]}
-        material={flatMat('metalDark')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.01, 0.011, 0.026, 6]} />
-      </mesh>
-
-      {/* Handset — grip bar + two cups, lifted to cradle height. */}
-      <group position={[0, HANDSET_Y, HANDSET_Z]}>
-        {/* Curved grip bar: a torus arc bowing up in +Y, spanning X. The
-            arc is centered about the ring's top by rotating Z, then dropped
-            so the bar sits on the group's midline. */}
-        <mesh
-          position={[0, GRIP_Y_OFF, 0]}
-          rotation={[0, 0, Math.PI / 2 - GRIP_ARC / 2]}
-          material={flatMat('metalDark')}
-          castShadow
-        >
-          <torusGeometry args={[GRIP_R, 0.011, 6, 10, GRIP_ARC]} />
-        </mesh>
-
-        {/* Ear cup (left) — flattened sphere. */}
-        <mesh
-          position={[-0.05, -0.012, 0]}
-          scale={[1.1, 0.7, 1]}
-          material={flatMat('metalDark')}
-          castShadow
-        >
-          <sphereGeometry args={[0.024, 8, 6]} />
-        </mesh>
-
-        {/* Mouth cup (right) — flattened sphere. */}
-        <mesh
-          position={[0.05, -0.012, 0]}
-          scale={[1.1, 0.7, 1]}
-          material={flatMat('metalDark')}
-          castShadow
-        >
-          <sphereGeometry args={[0.024, 8, 6]} />
-        </mesh>
-      </group>
-
-      {/* Coiled cord — TubeGeometry along the drooping CatmullRom curve. */}
-      <mesh material={flatMat('metalDark')} castShadow>
-        <tubeGeometry args={[cordCurve, 64, 0.006, 5, false]} />
-      </mesh>
     </group>
   );
 }

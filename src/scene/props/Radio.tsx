@@ -30,8 +30,23 @@
 
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBox } from '@react-three/drei';
 import { flatMat, emissiveMat, PALETTE } from '../materials';
+
+// Compose a TRS matrix from plain-array pos/rotation/scale (Euler XYZ, to
+// match r3f's default) so a mesh's JSX transform can be baked into geometry.
+function composeM(
+  pos: [number, number, number],
+  rot: [number, number, number] = [0, 0, 0],
+  scl: [number, number, number] = [1, 1, 1],
+) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(pos[0], pos[1], pos[2]),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+    new THREE.Vector3(scl[0], scl[1], scl[2]),
+  );
+}
 
 interface PropProps {
   position?: [number, number, number];
@@ -105,6 +120,37 @@ export default function Radio({ position = [0, 0, 0], rotationY = 0 }: PropProps
     mesh.instanceMatrix.needsUpdate = true;
   }, [slatMatrices]);
 
+  // The 4 static `metalDark` parts (grille backing, control plate, antenna,
+  // handle) merged into one geometry — a single draw call. Transforms baked.
+  const darkGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(new THREE.BoxGeometry(0.185, 0.15, 0.012).applyMatrix4(composeM([GRILLE_CX, CAB_CY, FRONT_Z - 0.002])));
+    parts.push(new THREE.BoxGeometry(0.085, 0.16, 0.012).applyMatrix4(composeM([PANEL_CX, CAB_CY, FRONT_Z + 0.001])));
+    parts.push(
+      new THREE.CylinderGeometry(0.0025, 0.006, ANT_LEN, 6).applyMatrix4(
+        composeM(ANT_CENTER, [-ANT_BACK, 0, ANT_LEFT]),
+      ),
+    );
+    parts.push(new THREE.TorusGeometry(0.05, 0.006, 6, 12, Math.PI).applyMatrix4(composeM([0, CAB_H, 0])));
+    return mergeGeometries(parts);
+  }, []);
+
+  // The 2 brass knobs merged into one geometry — a single draw call.
+  const knobGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(
+      new THREE.CylinderGeometry(0.02, 0.02, 0.022, 12).applyMatrix4(
+        composeM([PANEL_CX, 0.145, FRONT_Z + 0.017], [Math.PI / 2, 0, 0]),
+      ),
+    );
+    parts.push(
+      new THREE.CylinderGeometry(0.02, 0.02, 0.022, 12).applyMatrix4(
+        composeM([PANEL_CX, 0.055, FRONT_Z + 0.017], [Math.PI / 2, 0, 0]),
+      ),
+    );
+    return mergeGeometries(parts);
+  }, []);
+
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
       {/* Cabinet — rounded-edge box */}
@@ -118,10 +164,9 @@ export default function Radio({ position = [0, 0, 0], rotationY = 0 }: PropProps
         receiveShadow
       />
 
-      {/* Grille backing — recessed dark plate behind the slats */}
-      <mesh position={[GRILLE_CX, CAB_CY, FRONT_Z - 0.002]} material={flatMat('metalDark')} receiveShadow>
-        <boxGeometry args={[0.185, 0.15, 0.012]} />
-      </mesh>
+      {/* Merged metalDark: grille backing, control plate, antenna, handle —
+          one draw call. */}
+      <mesh geometry={darkGeo} material={flatMat('metalDark')} castShadow receiveShadow />
 
       {/* Speaker grille — one InstancedMesh of vertical slats */}
       <instancedMesh
@@ -133,28 +178,8 @@ export default function Radio({ position = [0, 0, 0], rotationY = 0 }: PropProps
         <boxGeometry args={[SLAT_W, SLAT_H, SLAT_D]} />
       </instancedMesh>
 
-      {/* Control panel — dark inset plate on the right third */}
-      <mesh position={[PANEL_CX, CAB_CY, FRONT_Z + 0.001]} material={flatMat('metalDark')} receiveShadow>
-        <boxGeometry args={[0.085, 0.16, 0.012]} />
-      </mesh>
-
-      {/* Two brass knobs — cylinders laid axis-along-Z, protruding from panel */}
-      <mesh
-        position={[PANEL_CX, 0.145, FRONT_Z + 0.017]}
-        rotation={[Math.PI / 2, 0, 0]}
-        material={flatMat('metalWarm')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.02, 0.02, 0.022, 12]} />
-      </mesh>
-      <mesh
-        position={[PANEL_CX, 0.055, FRONT_Z + 0.017]}
-        rotation={[Math.PI / 2, 0, 0]}
-        material={flatMat('metalWarm')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.02, 0.02, 0.022, 12]} />
-      </mesh>
+      {/* Two brass knobs, merged metalWarm — one draw call */}
+      <mesh geometry={knobGeo} material={flatMat('metalWarm')} castShadow />
 
       {/* Frequency dial strip — glows amber */}
       <mesh position={[PANEL_CX, CAB_CY, FRONT_Z + 0.012]} material={emissiveMat('marker', 0.7)}>
@@ -164,21 +189,6 @@ export default function Radio({ position = [0, 0, 0], rotationY = 0 }: PropProps
       {/* Dial needle — thin dark box just in front of the glowing strip */}
       <mesh position={[PANEL_CX + 0.012, CAB_CY, FRONT_Z + 0.017]} material={flatMat('wallDark')}>
         <boxGeometry args={[0.004, 0.022, 0.004]} />
-      </mesh>
-
-      {/* Whip antenna — thin tapered cylinder from the back-left top */}
-      <mesh
-        position={ANT_CENTER}
-        rotation={[-ANT_BACK, 0, ANT_LEFT]}
-        material={flatMat('metalDark')}
-        castShadow
-      >
-        <cylinderGeometry args={[0.0025, 0.006, ANT_LEN, 6]} />
-      </mesh>
-
-      {/* Carry handle — half-torus arching across the top (dark leather strap) */}
-      <mesh position={[0, CAB_H, 0]} material={flatMat('metalDark')} castShadow>
-        <torusGeometry args={[0.05, 0.006, 6, 12, Math.PI]} />
       </mesh>
     </group>
   );

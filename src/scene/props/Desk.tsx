@@ -7,7 +7,16 @@
 //
 // Materials come from the shared palette (materials.ts): carcass = `desk`,
 // knob = `metalWarm`, drawer recess = `wallDark`. No inline colors.
+//
+// Mesh budget: the 8 static `desk`-material parts (slab top, 4 legs, front
+// apron, back modesty panel, drawer face) are merged into ONE BufferGeometry
+// so the whole carcass is a single draw call. The `wallDark` drawer recess
+// and the `metalWarm` knob keep their own meshes (different materials). Net:
+// 10 meshes -> 3 meshes.
 
+import { useMemo } from 'react';
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat } from '../materials';
 
 // --- Key dimensions (meters) ------------------------------------------------
@@ -29,51 +38,50 @@ interface PropProps {
 }
 
 export default function Desk({ position = [0, 0, 0], rotationY = 0 }: PropProps) {
-  const legPositions: [number, number][] = [
-    [-LEG_HX, -LEG_HZ],
-    [LEG_HX, -LEG_HZ],
-    [-LEG_HX, LEG_HZ],
-    [LEG_HX, LEG_HZ],
-  ];
+  // Merge every static `desk`-material part (slab, 4 legs, apron, back
+  // panel, drawer face) into a single geometry — one draw call for the
+  // whole carcass. Each part's local transform is baked into its geometry.
+  const carcass = useMemo(() => {
+    const legPositions: [number, number][] = [
+      [-LEG_HX, -LEG_HZ],
+      [LEG_HX, -LEG_HZ],
+      [-LEG_HX, LEG_HZ],
+      [LEG_HX, LEG_HZ],
+    ];
+    const parts: THREE.BufferGeometry[] = [];
+    const bake = (
+      geo: THREE.BufferGeometry,
+      pos: [number, number, number],
+      rot: [number, number, number] = [0, 0, 0],
+    ) => {
+      const m = new THREE.Matrix4().compose(
+        new THREE.Vector3(pos[0], pos[1], pos[2]),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+        new THREE.Vector3(1, 1, 1),
+      );
+      parts.push(geo.applyMatrix4(m));
+    };
+
+    bake(new THREE.BoxGeometry(TOP_W, TOP_T, TOP_D), [0, TOP_CY, 0]);
+    legPositions.forEach(([lx, lz]) =>
+      bake(new THREE.CylinderGeometry(0.06, 0.042, LEG_H, 4), [lx, LEG_H / 2, lz], [0, Math.PI / 4, 0]),
+    );
+    bake(new THREE.BoxGeometry(1.66, 0.14, 0.05), [0, 0.66, 0.335]);
+    bake(new THREE.BoxGeometry(1.66, 0.3, 0.035), [0, 0.58, -0.33]);
+    bake(new THREE.BoxGeometry(0.42, 0.095, 0.02), [0, 0.66, 0.372]);
+
+    return mergeGeometries(parts);
+  }, []);
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Slab top with slight overhang */}
-      <mesh position={[0, TOP_CY, 0]} material={flatMat('desk')} castShadow receiveShadow>
-        <boxGeometry args={[TOP_W, TOP_T, TOP_D]} />
-      </mesh>
-
-      {/* Four tapered square legs (4-sided cylinders, wider at top) */}
-      {legPositions.map(([lx, lz], i) => (
-        <mesh
-          key={i}
-          position={[lx, LEG_H / 2, lz]}
-          rotation={[0, Math.PI / 4, 0]}
-          material={flatMat('desk')}
-          castShadow
-        >
-          <cylinderGeometry args={[0.06, 0.042, LEG_H, 4]} />
-        </mesh>
-      ))}
-
-      {/* Front apron (visitor / +Z side), carries the drawer */}
-      <mesh position={[0, 0.66, 0.335]} material={flatMat('desk')} castShadow>
-        <boxGeometry args={[1.66, 0.14, 0.05]} />
-      </mesh>
-
-      {/* Back modesty panel (-Z, toward the window) */}
-      <mesh position={[0, 0.58, -0.33]} material={flatMat('desk')} castShadow>
-        <boxGeometry args={[1.66, 0.3, 0.035]} />
-      </mesh>
+      {/* Merged `desk` carcass: slab top, 4 legs, apron, back panel, drawer
+          face — one geometry, one draw call. */}
+      <mesh geometry={carcass} material={flatMat('desk')} castShadow receiveShadow />
 
       {/* Drawer recess — dark inset frame reading as shadow */}
       <mesh position={[0, 0.66, 0.362]} material={flatMat('wallDark')}>
         <boxGeometry args={[0.46, 0.115, 0.02]} />
-      </mesh>
-
-      {/* Drawer face — proud of the recess */}
-      <mesh position={[0, 0.66, 0.372]} material={flatMat('desk')}>
-        <boxGeometry args={[0.42, 0.095, 0.02]} />
       </mesh>
 
       {/* Brass knob */}

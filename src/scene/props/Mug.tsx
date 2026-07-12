@@ -4,9 +4,11 @@
 // meters. Decal ("#1 DAD") faces +Z at rotationY=0; the handle sits at the
 // back (-Z) so it never competes with the decal.
 //
-// Structure (6 meshes total):
+// Structure (5 meshes total — body + handle share `paper` and are merged
+// into one geometry, so the ceramic is a single draw call):
 //   (a) body — ONE open-top LatheGeometry profile: base cap -> outer wall
 //       up -> lip -> short thin inner wall back down. `paper` (ceramic).
+//       Merged with the handle (c) into one BufferGeometry.
 //   (b) coffee surface — a flat disc dropped just inside the inner wall,
 //       near the top. `wallDark` (dark coffee).
 //   (c) handle — a half TorusGeometry, built via sequential geometry
@@ -49,6 +51,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat, PALETTE } from '../materials';
 import { useAppStore } from '../../state/store';
 import { colors } from '../../theme/tokens';
@@ -116,6 +119,17 @@ export default function Mug({ position = [0, 0, 0], rotationY = 0 }: PropProps) 
     return g;
   }, []);
 
+  // Body + handle both use `paper`; merge them into one geometry so the mug
+  // ceramic is a single draw call. The handle's local position is baked in
+  // (its orientation is already baked into handleGeometry above).
+  const paperGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [
+      new THREE.LatheGeometry(BODY_POINTS, BODY_SEGMENTS),
+      handleGeometry.clone().translate(0, HANDLE_Y, HANDLE_Z),
+    ];
+    return mergeGeometries(parts);
+  }, [handleGeometry]);
+
   // "#1 DAD" stamp — one small transparent canvas texture, painted (not a
   // new material color) in tokens' stampRed. See DEVIATION 1 above.
   const decalTexture = useMemo(() => {
@@ -177,18 +191,13 @@ export default function Mug({ position = [0, 0, 0], rotationY = 0 }: PropProps) 
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Body — outer wall, lip, and short inner wall in one lathe pass */}
-      <mesh material={flatMat('paper')} castShadow receiveShadow>
-        <latheGeometry args={[BODY_POINTS, BODY_SEGMENTS]} />
-      </mesh>
+      {/* Body + handle, merged `paper` ceramic — one draw call */}
+      <mesh geometry={paperGeo} material={flatMat('paper')} castShadow receiveShadow />
 
       {/* Coffee surface, visible through the open top */}
       <mesh position={[0, COFFEE_Y, 0]} rotation={[-Math.PI / 2, 0, 0]} material={flatMat('wallDark')}>
         <circleGeometry args={[COFFEE_RADIUS, 12]} />
       </mesh>
-
-      {/* Handle, back of the mug */}
-      <mesh position={[0, HANDLE_Y, HANDLE_Z]} geometry={handleGeometry} material={flatMat('paper')} castShadow />
 
       {/* "#1 DAD" decal, front of the mug */}
       <mesh position={[0, DECAL_Y, DECAL_Z]} material={decalMaterial}>

@@ -13,6 +13,13 @@
 // the interior sill to read as a hand-built beach-shack window. Open-air
 // opening — no glass mesh, matching the "sea breeze" note.
 
+// Mesh budget: the 6 `trim` boards (4 outer frame boards + 2 center
+// mullions) are merged into ONE BufferGeometry so the frame is a single
+// draw call. The interior sill keeps its own mesh (`woodLight`). 7 -> 2.
+
+import { useMemo } from 'react';
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat } from '../materials';
 
 const WINDOW_W = 1.6;
@@ -41,32 +48,30 @@ interface WindowFrameProps {
 }
 
 export default function WindowFrame({ position = [0, 0, 0] }: WindowFrameProps) {
-  const trim = flatMat('trim');
   const sillMat = flatMat('woodLight');
+
+  // Merge the 4 outer frame boards + 2 center mullions (all `trim`) into one
+  // geometry — a single draw call for the whole frame. Positions baked in.
+  const frame = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    const bake = (geo: THREE.BufferGeometry, pos: [number, number, number]) => {
+      geo.translate(pos[0], pos[1], pos[2]);
+      parts.push(geo);
+    };
+    bake(new THREE.BoxGeometry(FRAME_OUTER_W, FRAME_W, FRAME_D), [0, WINDOW_H / 2 + FRAME_W / 2, 0]);
+    bake(new THREE.BoxGeometry(FRAME_OUTER_W, FRAME_W, FRAME_D), [0, -WINDOW_H / 2 - FRAME_W / 2, 0]);
+    bake(new THREE.BoxGeometry(FRAME_W, WINDOW_H, FRAME_D), [-WINDOW_W / 2 - FRAME_W / 2, 0, 0]);
+    bake(new THREE.BoxGeometry(FRAME_W, WINDOW_H, FRAME_D), [WINDOW_W / 2 + FRAME_W / 2, 0, 0]);
+    bake(new THREE.BoxGeometry(MULL_W, WINDOW_H, MULL_D), [0, 0, 0]);
+    bake(new THREE.BoxGeometry(WINDOW_W, MULL_W, MULL_D), [0, 0, 0]);
+    return mergeGeometries(parts);
+  }, []);
 
   return (
     <group position={position}>
-      {/* --- Outer frame: 4 chunky boards, picture-frame joinery --------- */}
-      <mesh position={[0, WINDOW_H / 2 + FRAME_W / 2, 0]} material={trim}>
-        <boxGeometry args={[FRAME_OUTER_W, FRAME_W, FRAME_D]} />
-      </mesh>
-      <mesh position={[0, -WINDOW_H / 2 - FRAME_W / 2, 0]} material={trim}>
-        <boxGeometry args={[FRAME_OUTER_W, FRAME_W, FRAME_D]} />
-      </mesh>
-      <mesh position={[-WINDOW_W / 2 - FRAME_W / 2, 0, 0]} material={trim}>
-        <boxGeometry args={[FRAME_W, WINDOW_H, FRAME_D]} />
-      </mesh>
-      <mesh position={[WINDOW_W / 2 + FRAME_W / 2, 0, 0]} material={trim}>
-        <boxGeometry args={[FRAME_W, WINDOW_H, FRAME_D]} />
-      </mesh>
-
-      {/* --- Center mullions: 1 vertical + 1 horizontal, 4 panes --------- */}
-      <mesh position={[0, 0, 0]} material={trim}>
-        <boxGeometry args={[MULL_W, WINDOW_H, MULL_D]} />
-      </mesh>
-      <mesh position={[0, 0, 0]} material={trim}>
-        <boxGeometry args={[WINDOW_W, MULL_W, MULL_D]} />
-      </mesh>
+      {/* --- Outer frame + center mullions: merged `trim` geometry, one
+          draw call (4 boards + vertical & horizontal mullion). --------- */}
+      <mesh geometry={frame} material={flatMat('trim')} />
 
       {/* --- Interior sill: protruding shelf-edge below the opening ------ */}
       <mesh position={[0, SILL_Y, SILL_Z]} material={sillMat}>

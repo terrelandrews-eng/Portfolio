@@ -11,12 +11,32 @@
 //
 // Materials: `metalDark` for rod + hub, `woodLight` for blades — both from
 // the shared palette (materials.ts). No inline colors.
+//
+// Mesh budget: the static rod + hub (both `metalDark`) are merged into one
+// geometry, and the 5 `woodLight` blades are merged into one geometry that
+// lives INSIDE the spinning group (they all spin together as one group, so
+// merging them is safe and keeps the fan animating). 7 meshes -> 2.
 
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type * as THREE from 'three';
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat } from '../materials';
 import { useAppStore } from '../../state/store';
+
+// Compose a TRS matrix from plain-array pos/rotation/scale (Euler XYZ, to
+// match r3f's default) so a mesh's JSX transform can be baked into geometry.
+function composeM(
+  pos: [number, number, number],
+  rot: [number, number, number] = [0, 0, 0],
+  scl: [number, number, number] = [1, 1, 1],
+) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(pos[0], pos[1], pos[2]),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+    new THREE.Vector3(scl[0], scl[1], scl[2]),
+  );
+}
 
 const ROD_LEN = 0.16;
 const ROD_Y = -ROD_LEN / 2; // rod center, hangs from ceiling (y=0) downward
@@ -50,34 +70,39 @@ export default function CeilingFan({ position = [0, 0, 0], rotationY = 0 }: Prop
     }
   });
 
-  const bladeAngles = Array.from({ length: BLADE_COUNT }, (_, i) => (i * (Math.PI * 2)) / BLADE_COUNT);
+  // Static rod + hub (both metalDark) merged into one geometry.
+  const mountGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [
+      new THREE.CylinderGeometry(0.02, 0.02, ROD_LEN, 6).translate(0, ROD_Y, 0),
+      new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS * 0.9, HUB_HEIGHT, 8).translate(0, HUB_Y, 0),
+    ];
+    return mergeGeometries(parts);
+  }, []);
+
+  // The 5 blades merged into one geometry, authored in the spinning group's
+  // local space (each blade's angle + radial offset + pitch baked in). The
+  // group's own position offset and animated Y-spin stay on the group.
+  const bladesGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    for (let i = 0; i < BLADE_COUNT; i++) {
+      const angle = (i * (Math.PI * 2)) / BLADE_COUNT;
+      const m = composeM([0, 0, 0], [0, angle, 0]).multiply(
+        composeM([BLADE_RADIUS_OFFSET, 0, 0], [0, 0, BLADE_PITCH]),
+      );
+      parts.push(new THREE.BoxGeometry(BLADE_LEN, BLADE_T, BLADE_W).applyMatrix4(m));
+    }
+    return mergeGeometries(parts);
+  }, []);
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Downrod — ceiling mount to motor hub */}
-      <mesh position={[0, ROD_Y, 0]} material={flatMat('metalDark')} castShadow>
-        <cylinderGeometry args={[0.02, 0.02, ROD_LEN, 6]} />
-      </mesh>
+      {/* Downrod + motor hub, merged metalDark — one static draw call */}
+      <mesh geometry={mountGeo} material={flatMat('metalDark')} castShadow />
 
-      {/* Motor hub — static housing the blades key into */}
-      <mesh position={[0, HUB_Y, 0]} material={flatMat('metalDark')} castShadow>
-        <cylinderGeometry args={[HUB_RADIUS, HUB_RADIUS * 0.9, HUB_HEIGHT, 8]} />
-      </mesh>
-
-      {/* Spinning blade group */}
+      {/* Spinning blade group — all 5 blades merged into one geometry that
+          spins as a unit */}
       <group ref={bladeGroupRef} position={[0, HUB_Y, 0]}>
-        {bladeAngles.map((angle) => (
-          <group key={angle} rotation={[0, angle, 0]}>
-            <mesh
-              position={[BLADE_RADIUS_OFFSET, 0, 0]}
-              rotation={[0, 0, BLADE_PITCH]}
-              material={flatMat('woodLight')}
-              castShadow
-            >
-              <boxGeometry args={[BLADE_LEN, BLADE_T, BLADE_W]} />
-            </mesh>
-          </group>
-        ))}
+        <mesh geometry={bladesGeo} material={flatMat('woodLight')} castShadow />
       </group>
     </group>
   );

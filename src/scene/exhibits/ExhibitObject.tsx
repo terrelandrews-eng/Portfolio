@@ -4,7 +4,7 @@
 // wrapped mesh), click-to-open via the app store, and a dev-only letter
 // badge for grading/orientation while there's no real geometry yet.
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard, Html } from '@react-three/drei';
@@ -14,8 +14,6 @@ import { useAppStore } from '../../state/store';
 import { PALETTE } from '../materials';
 import { colors, fonts } from '../../theme/tokens';
 
-const HOVER_EMISSIVE = new THREE.Color('#3a2a0a');
-const NO_EMISSIVE = new THREE.Color('#000000');
 const CHECKED_MARKER = '#8FBF6E';
 const HOVER_MARKER = '#F7C866';
 
@@ -48,25 +46,10 @@ export default function ExhibitObject({ def, children }: ExhibitObjectProps) {
     ringRef.current.scale.setScalar(pulse);
   });
 
-  // Tint whatever mesh(es) the placeholder is made of on hover, without
-  // requiring the child to cooperate — just walk the wrapped group and
-  // set emissive on any material that supports it.
-  useEffect(() => {
-    const group = contentRef.current;
-    if (!group) return;
-    const target = hovered ? HOVER_EMISSIVE : NO_EMISSIVE;
-    group.traverse((obj) => {
-      const mesh = obj as THREE.Mesh;
-      if (!mesh.isMesh) return;
-      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      materials.forEach((m) => {
-        const mat = m as THREE.MeshLambertMaterial;
-        if (mat && 'emissive' in mat) {
-          mat.emissive.copy(target);
-        }
-      });
-    });
-  }, [hovered]);
+  // NOTE: no emissive tint on the wrapped meshes. Props share cached
+  // palette materials (materials.ts), so tinting one exhibit's material
+  // would tint every prop in the room using the same palette key. Hover
+  // feedback is the cursor plus the marker-ring brighten below.
 
   const markerColor = found ? CHECKED_MARKER : hovered ? HOVER_MARKER : PALETTE.marker;
 

@@ -29,6 +29,7 @@
 
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { flatMat, PALETTE, type PaletteKey } from '../materials';
 
 interface PropProps {
@@ -186,6 +187,24 @@ export default function Bookshelf({ position = [0, 0, 0], rotationY = 0 }: PropP
     [bookSpecs]
   );
 
+  // Merge the 4 `desk` carcass panels (2 sides, top, back) into one geometry
+  // and the 4 `woodLight` shelves into another — two draw calls instead of
+  // eight. Positions baked in (no rotations here).
+  const carcassGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(new THREE.BoxGeometry(D, H, SIDE_T).translate(D / 2, H / 2, W / 2 - SIDE_T / 2));
+    parts.push(new THREE.BoxGeometry(D, H, SIDE_T).translate(D / 2, H / 2, -(W / 2 - SIDE_T / 2)));
+    parts.push(new THREE.BoxGeometry(D, TOP_T, W).translate(D / 2, H - TOP_T / 2, 0));
+    parts.push(new THREE.BoxGeometry(BACK_T, H, W).translate(BACK_T / 2, H / 2, 0));
+    return mergeGeometries(parts);
+  }, []);
+
+  const shelvesGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    SHELF_YS.forEach((y) => parts.push(new THREE.BoxGeometry(SHELF_D, SHELF_T, INNER_W).translate(SHELF_CX, y, 0)));
+    return mergeGeometries(parts);
+  }, []);
+
   useLayoutEffect(() => {
     const mesh = booksRef.current;
     if (!mesh) return;
@@ -201,36 +220,11 @@ export default function Bookshelf({ position = [0, 0, 0], rotationY = 0 }: PropP
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Carcass: two sides, top, back panel */}
-      <mesh
-        position={[D / 2, H / 2, W / 2 - SIDE_T / 2]}
-        material={flatMat('desk')}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[D, H, SIDE_T]} />
-      </mesh>
-      <mesh
-        position={[D / 2, H / 2, -(W / 2 - SIDE_T / 2)]}
-        material={flatMat('desk')}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[D, H, SIDE_T]} />
-      </mesh>
-      <mesh position={[D / 2, H - TOP_T / 2, 0]} material={flatMat('desk')} castShadow receiveShadow>
-        <boxGeometry args={[D, TOP_T, W]} />
-      </mesh>
-      <mesh position={[BACK_T / 2, H / 2, 0]} material={flatMat('desk')} castShadow receiveShadow>
-        <boxGeometry args={[BACK_T, H, W]} />
-      </mesh>
+      {/* Carcass: two sides, top, back panel — merged `desk`, one draw call */}
+      <mesh geometry={carcassGeo} material={flatMat('desk')} castShadow receiveShadow />
 
-      {/* Four shelves */}
-      {SHELF_YS.map((y, i) => (
-        <mesh key={i} position={[SHELF_CX, y, 0]} material={flatMat('woodLight')} castShadow receiveShadow>
-          <boxGeometry args={[SHELF_D, SHELF_T, INNER_W]} />
-        </mesh>
-      ))}
+      {/* Four shelves — merged `woodLight`, one draw call */}
+      <mesh geometry={shelvesGeo} material={flatMat('woodLight')} castShadow receiveShadow />
 
       {/* Small framed certificate, propped against the back panel on
           shelf 2 (row 1). The dark back panel behind it reads as the

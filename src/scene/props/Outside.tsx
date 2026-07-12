@@ -28,8 +28,23 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { backdropMat, emissiveMat } from '../materials';
 import { useAppStore } from '../../state/store';
+
+// Compose a TRS matrix from plain-array pos/rotation/scale (Euler XYZ, to
+// match r3f's default) so a mesh's JSX transform can be baked into geometry.
+function composeM(
+  pos: [number, number, number],
+  rot: [number, number, number] = [0, 0, 0],
+  scl: [number, number, number] = [1, 1, 1],
+) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(pos[0], pos[1], pos[2]),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0], rot[1], rot[2])),
+    new THREE.Vector3(scl[0], scl[1], scl[2]),
+  );
+}
 
 interface OutsideProps {
   position?: [number, number, number];
@@ -122,6 +137,27 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
     });
   }, []);
 
+  // All static `silhouette` shapes merged into one geometry: the distant
+  // headland lump, the palm trunk tube, and the sailboat (hull + mast +
+  // sail, baked through the boat sub-group offset). One draw call. The palm
+  // fronds and foam strips stay instanced (still animate on the full tier).
+  const silhouetteGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = [];
+    parts.push(
+      new THREE.SphereGeometry(1, 10, 6).applyMatrix4(
+        composeM([-0.35, HORIZON_Y - 0.05, HEADLAND_Z], [0, 0, 0], [1.25, 0.34, 0.5]),
+      ),
+    );
+    parts.push(new THREE.TubeGeometry(trunkCurve, 12, 0.05, 5, false));
+    const boat = composeM([2.2, HORIZON_Y - 0.02, BOAT_Z]);
+    parts.push(new THREE.BoxGeometry(0.22, 0.05, 0.03).applyMatrix4(boat.clone()));
+    parts.push(
+      new THREE.CylinderGeometry(0.008, 0.008, 0.2, 5).applyMatrix4(boat.clone().multiply(composeM([0, 0.11, 0]))),
+    );
+    parts.push(new THREE.ShapeGeometry(sailShape).applyMatrix4(boat.clone().multiply(composeM([0.06, 0.11, 0]))));
+    return mergeGeometries(parts);
+  }, [trunkCurve]);
+
   useLayoutEffect(() => {
     if (frondRef.current) {
       frondMatrices.forEach((m, i) => frondRef.current!.setMatrixAt(i, m));
@@ -181,19 +217,9 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
       </mesh>
 
       {/* (d) SILHOUETTES ------------------------------------------------- */}
-      {/* Distant headland lump rising from the horizon (behind the sea). */}
-      <mesh
-        position={[-0.35, HORIZON_Y - 0.05, HEADLAND_Z]}
-        scale={[1.25, 0.34, 0.5]}
-        material={backdropMat('silhouette')}
-      >
-        <sphereGeometry args={[1, 10, 6]} />
-      </mesh>
-
-      {/* Hero palm — leaning trunk (S-bent tube). */}
-      <mesh material={backdropMat('silhouette')}>
-        <tubeGeometry args={[trunkCurve, 12, 0.05, 5, false]} />
-      </mesh>
+      {/* Distant headland + hero palm trunk + sailboat (hull/mast/sail),
+          all `silhouette`, merged into one geometry — a single draw call. */}
+      <mesh geometry={silhouetteGeo} material={backdropMat('silhouette')} />
 
       {/* Palm fronds — flattened drooping blades (instanced planes). The
           plane geometry is shifted so its base sits at the crown pivot. */}
@@ -204,19 +230,6 @@ export default function Outside({ position = [0, 0, 0] }: OutsideProps) {
       >
         <planeGeometry args={[0.13, 0.85]} />
       </instancedMesh>
-
-      {/* Tiny sailboat on the horizon, right of center: hull + mast + sail. */}
-      <group position={[2.2, HORIZON_Y - 0.02, BOAT_Z]}>
-        <mesh material={backdropMat('silhouette')}>
-          <boxGeometry args={[0.22, 0.05, 0.03]} />
-        </mesh>
-        <mesh position={[0, 0.11, 0]} material={backdropMat('silhouette')}>
-          <cylinderGeometry args={[0.008, 0.008, 0.2, 5]} />
-        </mesh>
-        <mesh position={[0.06, 0.11, 0]} material={backdropMat('silhouette')}>
-          <shapeGeometry args={[sailShape]} />
-        </mesh>
-      </group>
     </group>
   );
 }
