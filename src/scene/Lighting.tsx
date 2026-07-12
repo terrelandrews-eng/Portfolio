@@ -40,11 +40,11 @@ const KEY_INTENSITY = 2.4; // dominant: how hard the sun models the room; raise 
 const KEY_POSITION: [number, number, number] = [3.4, 3.8, -6.2]; // sun: right + high + behind the back wall
 const KEY_TARGET: [number, number, number] = [0.2, 0.5, -0.4]; // aim the beam down onto the desk/floor center
 const KEY_SHADOW_BIAS = -0.0004; // depth nudge to kill shadow acne on flat Lambert planes
-const KEY_SHADOW_NORMAL_BIAS = 0.03; // along-normal offset — the primary acne fix on big flat walls/floor
-const KEY_SHADOW_EXTENT = 5.5; // half-size of the orthographic shadow frustum — fits the whole room, no wasted texels
+const KEY_SHADOW_NORMAL_BIAS = 0.02; // along-normal acne fix — lowered from 0.03: texels are now ~2.7x smaller, so the old value risked peter-panning at the desk feet
+const KEY_SHADOW_EXTENT = 4.15; // ortho half-extent — tightest symmetric fit of the full room bbox in light space (corners span u ±4.08, w -1.95..+4.14); smaller clips the back wall / far floor corners
 const KEY_SHADOW_NEAR = 1.0; // near clip along the light (starts before the room)
 const KEY_SHADOW_FAR = 16.0; // far clip along the light (ends past the far wall)
-const KEY_SHADOW_MAP_HIGH = 2048; // crisp shadow edges on 'high'
+const KEY_SHADOW_MAP_HIGH = 4096; // ~2mm texels to kill the grazing-angle staircase on the corkboard; one 4096 depth target (~64MB, single caster pass) is fine on desktop 'high' and never allocated on lower tiers
 const KEY_SHADOW_MAP_LOW = 1024; // cheaper map if shadows are ever enabled below 'high'
 
 // ---------------------------------------------------------------------------
