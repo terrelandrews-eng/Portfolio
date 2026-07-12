@@ -44,9 +44,11 @@ export default function Room() {
         intensity={1.2}
       />
       <pointLight color={PALETTE.marker} position={[0.35, 1.15, -1.1]} intensity={1.6} distance={5} />
-      {/* Dim warm fill for the right wall so the photo string reads at its
-          dolly; M5 replaces all of this. */}
+      {/* Dim warm fills so wall exhibits read at their dollies (right wall:
+          photo string; back-left: corkboard + bookshelf); M5 replaces all
+          of this. */}
       <pointLight color={PALETTE.lampGlow} position={[2.4, 2.0, -0.2]} intensity={0.5} distance={3.5} />
+      <pointLight color={PALETTE.lampGlow} position={[-1.7, 2.1, -1.4]} intensity={0.55} distance={4} />
 
       {/* --- Floor ----------------------------------------------------- */}
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>

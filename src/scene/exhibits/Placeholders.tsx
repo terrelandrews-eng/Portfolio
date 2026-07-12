@@ -39,7 +39,7 @@ import PhotoString from '../props/PhotoString';
 // hair), not at its marker anchor, so the nails sit ON the wall.
 const REAL: Partial<Record<ExhibitId, ReactNode>> = {
   window: <WindowFrame position={[0.9, 1.7, -2.55]} />,
-  board: <Corkboard position={[-1.5, 1.75, -2.55]} />,
+  board: <Corkboard position={[-1.5, 1.75, -2.54]} />,
   shelf: <Bookshelf position={[-3.05, 0, -1.2]} />,
   journal: <Journal position={[-0.35, 0.79, -1.05]} rotationY={0.32} />,
   laptop: <Laptop position={[0.35, 0.79, -1.25]} rotationY={0.14} />,

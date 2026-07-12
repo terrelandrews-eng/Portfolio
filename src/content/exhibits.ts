@@ -343,8 +343,8 @@ export const EXHIBITS: Array<ExhibitCore & { content: ExhibitContent }> = [
     panelTitle: 'CREDENTIALS',
     anchor: [-3.0, 1.2, -1.2],
     camera: {
-      pos: [-2.415, 1.25, -0.518],
-      lookAt: [-3.0, 1.2, -1.2],
+      pos: [-2.2, 1.5, -0.85],
+      lookAt: [-3.0, 1.35, -1.2],
     },
     content: {
       kind: 'credentials',
