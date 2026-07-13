@@ -2,13 +2,17 @@
 // and the room + exhibit content. SceneRoot owns the Canvas shell (DOM
 // wrapper, camera/dpr/shadow config); this owns what's drawn.
 
+import { lazy, Suspense } from 'react';
 import { colors } from '../theme/tokens';
 import CameraRig from './CameraRig';
 import Room from './Room';
 import Placeholders from './exhibits/Placeholders';
-import Effects from './Effects';
 import LightShafts from './atmosphere/LightShafts';
 import DustMotes from './atmosphere/DustMotes';
+
+// Post chain pulls in @react-three/postprocessing; deferred so the room
+// paints before that chunk loads.
+const Effects = lazy(() => import('./Effects'));
 
 export default function Scene() {
   return (
@@ -26,7 +30,9 @@ export default function Scene() {
       <LightShafts />
       <DustMotes />
       {/* Post chain (M5): Bloom -> DoF (high tier) -> Vignette -> Noise. */}
-      <Effects />
+      <Suspense fallback={null}>
+        <Effects />
+      </Suspense>
     </>
   );
 }

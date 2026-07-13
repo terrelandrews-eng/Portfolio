@@ -8,6 +8,7 @@
 //   left wall   x = -3.2    right wall  x = +3.2
 // Window opening in the back wall, centered near (0.9, 1.7), 1.6w x 1.1h.
 
+import { lazy, Suspense } from 'react';
 import { PALETTE } from './materials';
 import Lighting from './Lighting';
 import Desk from './props/Desk';
@@ -15,7 +16,10 @@ import Chair from './props/Chair';
 import CeilingFan from './props/CeilingFan';
 import DeskLamp from './props/DeskLamp';
 import Clutter from './props/Clutter';
-import Outside from './props/Outside';
+
+// Outside-the-window scenery is deferred behind Suspense so the room
+// itself paints first; this is r3f/Canvas Suspense, not DOM Suspense.
+const Outside = lazy(() => import('./props/Outside'));
 
 const ROOM_WIDTH = 6.4;
 const ROOM_DEPTH = 5.2;
@@ -93,7 +97,9 @@ export default function Room() {
       </mesh>
 
       {/* --- The world outside the window (sea, sky, palms, boat) ------- */}
-      <Outside />
+      <Suspense fallback={null}>
+        <Outside />
+      </Suspense>
 
       {/* --- Furniture & scenery props (M4) ------------------------------ */}
       <Desk position={[0.3, 0, -1.2]} rotationY={(8 * Math.PI) / 180} />
