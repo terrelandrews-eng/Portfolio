@@ -3,6 +3,7 @@ import { useDeviceTier } from './hooks/useDeviceTier';
 import { colors } from './theme/tokens';
 import SceneRoot from './scene/SceneRoot';
 import HudRoot from './ui/HudRoot';
+import IntroOverlay from './ui/IntroOverlay';
 import StaticFallback from './fallback/StaticFallback';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
     <>
       <SceneRoot />
       <HudRoot />
+      <IntroOverlay />
     </>
   );
 }

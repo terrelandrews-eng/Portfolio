@@ -54,6 +54,7 @@ import { EXHIBITS_BY_ID } from '../content/exhibits';
 import type { ExhibitId } from '../content/types';
 import { useAppStore } from '../state/store';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { INTRO_TIMING } from '../ui/introTiming';
 import {
   advance,
   flightArrived,
@@ -71,6 +72,15 @@ import {
 const SEAT: V3 = [0, 1.45, 2.3];
 const BASE_LOOK: V3 = [0, 1.3, -1.5];
 const SCENE_FOV = 55;
+
+// ── Intro (M6.1) fly-in poses ───────────────────────────────────────────────
+// Start close over the desk (right by the laptop/journal camera poses, which
+// sit ~[0.33,1.04,-0.73]), looking down at the workspace, then pull back and
+// up to the seat overview. Reads as "rising from the operative's desk to
+// survey the room." fov is held at SCENE_FOV so it's a clean dolly, no zoom.
+const INTRO_START: V3 = [0.32, 1.05, -0.55];
+const INTRO_START_LOOK: V3 = [0.1, 0.9, -1.15];
+const INTRO_FLYIN_S = INTRO_TIMING.flyinMs / 1000;
 
 // ── Motion tuning ─────────────────────────────────────────────────────────
 const DRIFT_YAW_AMP = 0.015;
@@ -139,6 +149,7 @@ export default function CameraRig() {
   const modeRef = useRef<Mode>('idle');
   const committedRef = useRef<ExhibitId | null>(null);
   const flightRef = useRef<Flight | null>(null);
+  const introFlightRef = useRef<Flight | null>(null); // M6.1 fly-in, built once on 'flyin'
   const justBeganRef = useRef(false); // defer arrival one frame after (re)begin
   const currentLookRef = useRef<V3>([BASE_LOOK[0], BASE_LOOK[1], BASE_LOOK[2]]);
 
@@ -180,9 +191,9 @@ export default function CameraRig() {
     w.__rig = {
       goto(id) {
         const st = useAppStore.getState();
-        // DEV convenience: M6 (the real intro) isn't wired yet, so the rig
-        // would otherwise sit frozen pre-intro and this hook would be inert.
-        // Force the intro done so screenshots / chaos tests actually drive it.
+        // DEV/test convenience: if a harness drives the rig mid-intro, skip
+        // straight to 'done' (same path the overlay's skip uses) so goto()
+        // isn't inert while the intro is still playing.
         if (st.introPhase !== 'done') st.skipIntro();
         if (id === null) {
           if (st.panelId !== null) st.closePanel();
@@ -212,13 +223,61 @@ export default function CameraRig() {
     const st = useAppStore.getState();
     const reduced = prefersReduced || st.qualityTier === 'reduced';
 
-    // ── Intro not done: park at seat, no input (M6 owns the real intro) ────
+    // ── Intro (M6.1): the rig owns the camera during 'hold'/'flyin', with no
+    // idle drift and no mouse-look — the intro owns the frame. IntroOverlay
+    // drives the phase transitions and the curtain; here we only place the
+    // camera. On 'done' this block is skipped and normal idle/flyTo resumes
+    // seamlessly (idle's base pose IS the seat, where the fly-in lands). A
+    // skip (skipIntro -> 'done') therefore snaps straight to the seat pose. ─
     if (st.introPhase !== 'done') {
-      camera.position.set(SEAT[0], SEAT[1], SEAT[2]);
-      currentLookRef.current[0] = BASE_LOOK[0];
-      currentLookRef.current[1] = BASE_LOOK[1];
-      currentLookRef.current[2] = BASE_LOOK[2];
-      _lookTarget.set(BASE_LOOK[0], BASE_LOOK[1], BASE_LOOK[2]);
+      if (st.introPhase === 'hold') {
+        // Parked. Reduced motion has no fly-in, so it holds AT the seat;
+        // otherwise it holds at the close over-the-desk start pose.
+        introFlightRef.current = null;
+        const p = reduced ? SEAT : INTRO_START;
+        const l = reduced ? BASE_LOOK : INTRO_START_LOOK;
+        camera.position.set(p[0], p[1], p[2]);
+        _lookTarget.set(l[0], l[1], l[2]);
+        currentLookRef.current[0] = l[0];
+        currentLookRef.current[1] = l[1];
+        currentLookRef.current[2] = l[2];
+      } else {
+        // 'flyin': dolly desk -> seat, reusing flight.ts easing (built once
+        // from the start pose, advanced each frame). The overlay flips to
+        // 'done' at ~flyinMs, by which point the flight has landed at the seat.
+        if (!introFlightRef.current) {
+          introFlightRef.current = makeFlight(
+            INTRO_START,
+            INTRO_START_LOOK,
+            SCENE_FOV,
+            SEAT,
+            BASE_LOOK,
+            SCENE_FOV,
+            INTRO_FLYIN_S,
+            reduced,
+          );
+        }
+        advance(introFlightRef.current, dt);
+        samplePos(introFlightRef.current, _basePos);
+        sampleLook(introFlightRef.current, _baseLook);
+        camera.position.set(_basePos[0], _basePos[1], _basePos[2]);
+        _lookTarget.set(_baseLook[0], _baseLook[1], _baseLook[2]);
+        currentLookRef.current[0] = _baseLook[0];
+        currentLookRef.current[1] = _baseLook[1];
+        currentLookRef.current[2] = _baseLook[2];
+        camera.fov = sampleFov(introFlightRef.current);
+        camera.updateProjectionMatrix();
+        // Fire 'flyin' -> 'done' on the SAME frame clock as the dolly: the
+        // moment the flight lands, not on a blind wall-clock timer. This can
+        // never fire before the camera has visibly moved.
+        if (
+          flightArrived(introFlightRef.current) &&
+          useAppStore.getState().introPhase !== 'done'
+        ) {
+          useAppStore.getState().setIntroPhase('done');
+        }
+      }
+
       camera.up.set(0, 1, 0);
       camera.lookAt(_lookTarget);
       updatePerf(dt);

@@ -93,10 +93,12 @@ function clearStorage(): void {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  // TEMPORARY until M6 builds the real intro sequence: start with the intro
-  // already done so the rig, HUD, and markers are live on load. M6 must flip
-  // this back to 'hold' when it wires the choreographed intro.
-  introPhase: 'done',
+  // The intro sequence (M6.1) starts in 'hold' and is driven to 'done' by
+  // IntroOverlay (timer path), skipIntro() (any pointer/key or window.__rig),
+  // reduced-motion (fast static path), or a hard failsafe timeout. Every one
+  // of those paths lands on 'done', so the page can never sit frozen here —
+  // see the M2 note in the git history for why that guarantee matters.
+  introPhase: 'hold',
   focusId: null,
   panelId: null,
   found: readFound(),
