@@ -98,6 +98,20 @@ const MOUSE_SMOOTH = 0.28; // maath damp smoothTime (feels like turning your hea
 const MOUSE_SMOOTH_REDUCED = 0.6; // heavier
 const INFLUENCE_SMOOTH = 0.5; // how fast mouse/drift influence ramps between modes
 
+// ── Touch-look tuning (M7.2) ────────────────────────────────────────────────
+// One-finger drag accumulates a yaw/pitch offset (clamped) that feeds the SAME
+// look pathway as mouse-look (mouseAnglesRef). Ranges are a touch wider than
+// mouse so a phone still feels like it can look around; reduced motion narrows
+// them and damps harder, mirroring the mouse-look reduced path.
+const TOUCH_YAW_RANGE = 0.3;
+const TOUCH_PITCH_RANGE = 0.16;
+const TOUCH_YAW_RANGE_REDUCED = 0.14;
+const TOUCH_PITCH_RANGE_REDUCED = 0.08;
+const TOUCH_SENSITIVITY = 0.0016; // radians of look per px of finger travel
+const TOUCH_TAP_SLOP_PX = 8; // movement under this stays a tap, never a drag
+const TOUCH_SMOOTH = 0.24; // damp toward the drag target (calm, not twitchy)
+const TOUCH_SMOOTH_REDUCED = 0.6;
+
 // Per-mode influence targets for [mouse, drift].
 const MOUSE_INF = { idle: 1, flyTo: 0.15, focused: 0.4, returnToSeat: 1 } as const;
 const DRIFT_INF = { idle: 1, flyTo: 0, focused: 0, returnToSeat: 1 } as const;
@@ -130,6 +144,10 @@ function rotateDir(d: THREE.Vector3, yaw: number, pitch: number): void {
   d.set(x1, y2, z2);
 }
 
+function clamp(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
+
 interface DevRig {
   goto(id: ExhibitId | string | null): void;
   state(): { mode: Mode; t: number; pos: [number, number, number] };
@@ -153,19 +171,92 @@ export default function CameraRig() {
   const justBeganRef = useRef(false); // defer arrival one frame after (re)begin
   const currentLookRef = useRef<V3>([BASE_LOOK[0], BASE_LOOK[1], BASE_LOOK[2]]);
 
-  const pointerRef = useRef({ x: 0, y: 0 }); // NDC, updated by listener
-  const mouseAnglesRef = useRef({ yaw: 0, pitch: 0 }); // damped mouse-look
+  const pointerRef = useRef({ x: 0, y: 0 }); // NDC, updated by listener (mouse/pen)
+  const mouseAnglesRef = useRef({ yaw: 0, pitch: 0 }); // damped look (mouse OR touch)
   const mouseInfRef = useRef({ v: 1 });
   const driftInfRef = useRef({ v: 1 });
+
+  // Touch-look (M7.2): accumulated one-finger drag target + the finger we're
+  // tracking. `lastInputRef` selects which target mouseAnglesRef damps toward,
+  // per-input-type so a hybrid device (mouse + touchscreen) switches cleanly.
+  const touchTargetRef = useRef({ yaw: 0, pitch: 0 });
+  const activeTouchRef = useRef({
+    id: null as number | null,
+    startX: 0,
+    startY: 0,
+    lastX: 0,
+    lastY: 0,
+    dragging: false,
+  });
+  const lastInputRef = useRef<'mouse' | 'touch'>('mouse');
+  const reducedRef = useRef(false); // mirrors `reduced` for the touch listeners
 
   const perfAccum = useRef({ frames: 0, time: 0 });
 
   // ── Pointer + ESC listeners ─────────────────────────────────────────────
   useEffect(() => {
+    // Touch drag: accumulate finger deltas into a clamped yaw/pitch target.
+    // Only tracked once movement passes the tap slop, so a tap never nudges
+    // the camera and never swallows the r3f onClick that opens an exhibit.
+    const onTouchMove = (e: PointerEvent) => {
+      const a = activeTouchRef.current;
+      if (a.id !== e.pointerId) return;
+      if (!a.dragging) {
+        if (Math.hypot(e.clientX - a.startX, e.clientY - a.startY) < TOUCH_TAP_SLOP_PX) {
+          return; // still within tap slop — leave it for onClick
+        }
+        a.dragging = true;
+        lastInputRef.current = 'touch';
+        a.lastX = e.clientX; // reset baseline so we don't jump by the slop
+        a.lastY = e.clientY;
+        return;
+      }
+      const dx = e.clientX - a.lastX;
+      const dy = e.clientY - a.lastY;
+      a.lastX = e.clientX;
+      a.lastY = e.clientY;
+      const red = reducedRef.current;
+      const yr = red ? TOUCH_YAW_RANGE_REDUCED : TOUCH_YAW_RANGE;
+      const pr = red ? TOUCH_PITCH_RANGE_REDUCED : TOUCH_PITCH_RANGE;
+      const t = touchTargetRef.current;
+      // Grab-the-world feel: drag right -> look left; drag down -> look up.
+      t.yaw = clamp(t.yaw + dx * TOUCH_SENSITIVITY, -yr, yr);
+      t.pitch = clamp(t.pitch + dy * TOUCH_SENSITIVITY, -pr, pr);
+    };
+
     const onMove = (e: PointerEvent) => {
+      // Touch never drives the pointer-derived (hover) target; it has its own
+      // drag path. Mouse and pen keep the exact desktop mouse-look behavior.
+      if (e.pointerType === 'touch') {
+        onTouchMove(e);
+        return;
+      }
+      lastInputRef.current = 'mouse';
       pointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointerRef.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
     };
+
+    const onTouchDown = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch') return;
+      // Intro owns input; the overlay handles tap-to-skip. Don't accumulate a
+      // look offset from a drag during the intro.
+      if (useAppStore.getState().introPhase !== 'done') return;
+      if (activeTouchRef.current.id !== null) return; // one finger only
+      const a = activeTouchRef.current;
+      a.id = e.pointerId;
+      a.startX = a.lastX = e.clientX;
+      a.startY = a.lastY = e.clientY;
+      a.dragging = false;
+    };
+
+    const onTouchEnd = (e: PointerEvent) => {
+      const a = activeTouchRef.current;
+      if (a.id === e.pointerId) {
+        a.id = null;
+        a.dragging = false;
+      }
+    };
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       const st = useAppStore.getState();
@@ -177,9 +268,15 @@ export default function CameraRig() {
       }
     };
     window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerdown', onTouchDown);
+    window.addEventListener('pointerup', onTouchEnd);
+    window.addEventListener('pointercancel', onTouchEnd);
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerdown', onTouchDown);
+      window.removeEventListener('pointerup', onTouchEnd);
+      window.removeEventListener('pointercancel', onTouchEnd);
       window.removeEventListener('keydown', onKey);
     };
   }, []);
@@ -222,6 +319,7 @@ export default function CameraRig() {
     const dt = Math.min(rawDelta, 0.1); // clamp huge deltas (tab refocus)
     const st = useAppStore.getState();
     const reduced = prefersReduced || st.qualityTier === 'reduced';
+    reducedRef.current = reduced; // so touch listeners clamp to the right range
 
     // ── Intro (M6.1): the rig owns the camera during 'hold'/'flyin', with no
     // idle drift and no mouse-look — the intro owns the frame. IntroOverlay
@@ -399,12 +497,20 @@ export default function CameraRig() {
     const mouseInf = mouseInfRef.current.v;
     const driftInf = driftInfRef.current.v;
 
-    // ── Mouse-look (damped toward pointer-derived target) ────────────────
-    const yawRange = reduced ? MOUSE_YAW_RANGE_REDUCED : MOUSE_YAW_RANGE;
-    const pitchRange = reduced ? MOUSE_PITCH_RANGE_REDUCED : MOUSE_PITCH_RANGE;
-    const smooth = reduced ? MOUSE_SMOOTH_REDUCED : MOUSE_SMOOTH;
-    damp(mouseAnglesRef.current, 'yaw', -pointerRef.current.x * yawRange, smooth, dt);
-    damp(mouseAnglesRef.current, 'pitch', pointerRef.current.y * pitchRange, smooth, dt);
+    // ── Look-around (damped) — mouse/pen follow the pointer; touch follows
+    // the accumulated one-finger drag target. Both write mouseAnglesRef, so
+    // idle drift, fly-to, and focused modes compose identically either way. ─
+    if (lastInputRef.current === 'touch') {
+      const touchSmooth = reduced ? TOUCH_SMOOTH_REDUCED : TOUCH_SMOOTH;
+      damp(mouseAnglesRef.current, 'yaw', touchTargetRef.current.yaw, touchSmooth, dt);
+      damp(mouseAnglesRef.current, 'pitch', touchTargetRef.current.pitch, touchSmooth, dt);
+    } else {
+      const yawRange = reduced ? MOUSE_YAW_RANGE_REDUCED : MOUSE_YAW_RANGE;
+      const pitchRange = reduced ? MOUSE_PITCH_RANGE_REDUCED : MOUSE_PITCH_RANGE;
+      const smooth = reduced ? MOUSE_SMOOTH_REDUCED : MOUSE_SMOOTH;
+      damp(mouseAnglesRef.current, 'yaw', -pointerRef.current.x * yawRange, smooth, dt);
+      damp(mouseAnglesRef.current, 'pitch', pointerRef.current.y * pitchRange, smooth, dt);
+    }
 
     // ── Idle drift (Lissajous), scaled by drift influence ────────────────
     const driftYaw = reduced ? 0 : Math.sin(t * DRIFT_YAW_FREQ) * DRIFT_YAW_AMP;

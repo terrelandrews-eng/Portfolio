@@ -191,6 +191,33 @@
   margin: 0 0 4px;
 }
 
+/* ---- Portrait / mobile layout (M7.2) --------------------------------
+ * Panels go effectively full-width with small margins and keep their own
+ * internal scroll (overflow-y:auto is already on .ta-panel) so tall content
+ * is never clipped or unreachable on a phone. Desktop rules above unchanged. */
+@media (max-width: 820px) {
+  .ta-panel-backdrop {
+    padding: 12px;
+  }
+
+  .ta-panel {
+    width: 100%;
+    max-height: 92vh;
+  }
+
+  .ta-panel__content {
+    padding: 20px 18px 26px;
+  }
+
+  .ta-panel__title {
+    font-size: 22px;
+  }
+
+  .ta-panel__image {
+    height: 200px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ta-panel-backdrop {
     animation: none;

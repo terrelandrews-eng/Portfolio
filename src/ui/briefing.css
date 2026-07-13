@@ -248,6 +248,32 @@
   color: var(--ta-done-stamp, #b0402e);
 }
 
+/* ---- Portrait / mobile layout (M7.2) --------------------------------
+ * Keep the briefing card fully on-screen in portrait (left+right margins
+ * instead of a fixed width, and no rotation that could hang off the edge),
+ * and give the dismiss button a comfortable tap target. The completion
+ * modal already uses min(520px, 90vw), so it fits as-is. Desktop unchanged. */
+@media (max-width: 820px) {
+  .ta-briefing {
+    left: 12px;
+    right: 12px;
+    bottom: 14px;
+    width: auto;
+    max-width: none;
+    transform: none;
+    padding: 14px 16px;
+  }
+
+  .ta-briefing__body {
+    font-size: 12.5px;
+    margin: 10px 0 12px;
+  }
+
+  .ta-briefing__dismiss {
+    padding: 11px 18px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ta-briefing {
     animation: none;
