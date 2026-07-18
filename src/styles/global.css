@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  background: #0b1215;
+  color: #ede6d2;
+  font-family: 'Courier Prime', monospace;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The WebGL canvas owns one-finger drag (touch-look, M7.2). Disable the
+ * browser's default touch gestures on it so a look-drag can't scroll or
+ * pinch-zoom the page. Scoped to the canvas only — the HUD/panel DOM keeps
+ * normal touch behavior so long panel content still scrolls with a finger. */
+canvas {
+  touch-action: none;
+  overscroll-behavior: none;
+}

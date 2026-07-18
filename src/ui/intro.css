@@ -1,0 +1,129 @@
+/* Intro curtain (M6.1). A near-black full-viewport overlay with a small,
+ * centered case-file title treatment, matching the HUD/briefing chrome
+ * (Courier Prime, amber accent, double-ruled red "EYES ONLY" stamp).
+ *
+ * Colors/z/font arrive as CSS custom properties set inline by
+ * IntroOverlay.tsx from src/theme/tokens.ts — this file stays free of
+ * hard-coded hex outside var() fallbacks, matching hud.css / briefing.css.
+ */
+
+.ta-intro {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ta-intro-z, 400);
+  display: grid;
+  place-items: center;
+  background: var(--ta-intro-bg, #0b1215);
+  font-family: var(--ta-intro-font, 'Courier Prime', 'Courier New', monospace);
+  /* Fully opaque during 'hold'; the .is-fading class drives it to 0. */
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Fly-in: the whole curtain fades out over the first beat of the dolly. */
+.ta-intro.is-fading {
+  opacity: 0;
+  transition: opacity var(--ta-intro-fade-ms, 800ms) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ta-intro__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.ta-intro__stamp {
+  border: 3px double var(--ta-intro-stamp, #b0402e);
+  color: var(--ta-intro-stamp, #b0402e);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 5px 12px;
+  transform: rotate(-6deg);
+  opacity: 0;
+  animation: ta-intro-stamp-in 420ms ease 120ms both;
+}
+
+.ta-intro__title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: clamp(18px, 3.2vw, 30px);
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--ta-intro-amber, #e8b54a);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
+  /* Typewriter: clip the line and sweep it open. */
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 0;
+  animation: ta-intro-type 520ms steps(11, end) 200ms both;
+}
+
+.ta-intro__num {
+  color: var(--ta-intro-paper, #ede6d2);
+}
+
+/* Blinking caret at the end of the typed line. */
+.ta-intro__caret {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1em;
+  margin-left: 2px;
+  transform: translateY(0.12em);
+  background: var(--ta-intro-amber, #e8b54a);
+  animation: ta-intro-caret 900ms step-end 720ms infinite;
+}
+
+@keyframes ta-intro-type {
+  from { max-width: 0; }
+  to { max-width: 16ch; }
+}
+
+@keyframes ta-intro-stamp-in {
+  from { opacity: 0; transform: scale(1.25) rotate(-6deg); }
+  to { opacity: 1; transform: scale(1) rotate(-6deg); }
+}
+
+@keyframes ta-intro-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Reduced motion: no continuous animation anywhere. The card is a static
+ * opacity cut — it shows instantly and the whole curtain is removed (not
+ * faded) when the component unmounts at 'done'. Mirror the same guard for
+ * the system-level prefers-reduced-motion media query, so either signal
+ * (the store's 'reduced' tier OR the OS setting) kills the animations. */
+.ta-intro--reduced .ta-intro__stamp,
+.ta-intro--reduced .ta-intro__title,
+.ta-intro--reduced .ta-intro__caret {
+  animation: none;
+  opacity: 1;
+  max-width: none;
+}
+
+.ta-intro--reduced .ta-intro__caret {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta-intro.is-fading {
+    transition: none;
+  }
+
+  .ta-intro__stamp,
+  .ta-intro__title,
+  .ta-intro__caret {
+    animation: none;
+    opacity: 1;
+    max-width: none;
+  }
+
+  .ta-intro__caret {
+    display: none;
+  }
+}

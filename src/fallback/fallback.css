@@ -1,0 +1,457 @@
+/* Static no-WebGL fallback: full evidence index rendered as plain,
+   accessible, SEO-visible document. Noir case-file look, no motion.
+   Tokens (colors/fonts) are applied via CSS custom properties set inline
+   by StaticFallback.tsx's className usage below — values are duplicated
+   from theme/tokens.ts as literal hex since CSS files can't import TS.
+   Keep these in sync with src/theme/tokens.ts if it changes. */
+
+.fb-root {
+  min-height: 100vh;
+  background: #0b1215;
+  color: #ede6d2;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  line-height: 1.6;
+  padding: 32px 20px 64px;
+}
+
+.fb-root * {
+  box-sizing: border-box;
+}
+
+.fb-header,
+.fb-main,
+.fb-footer {
+  max-width: 65ch;
+  margin: 0 auto;
+}
+
+/* --- Header ------------------------------------------------------- */
+
+.fb-header {
+  border-bottom: 1px solid #7a2e22;
+  padding-bottom: 20px;
+  margin-bottom: 32px;
+}
+
+.fb-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: #a9843a;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.fb-title {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: #e8b54a;
+  margin: 0 0 10px;
+  word-break: break-word;
+}
+
+.fb-role,
+.fb-station {
+  margin: 0 0 4px;
+  color: #c9c0a8;
+  font-size: 0.95rem;
+}
+
+.fb-status {
+  margin: 12px 0 4px;
+  font-size: 0.9rem;
+  color: #c9c0a8;
+}
+
+.fb-status span {
+  color: #e8b54a;
+  font-weight: bold;
+}
+
+.fb-eyes-only {
+  display: inline-block;
+  margin: 8px 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: #b0402e;
+  border: 1px solid #7a2e22;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+/* --- Briefing ------------------------------------------------------- */
+
+.fb-briefing {
+  background: #141c20;
+  border: 1px solid #7a2e22;
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+.fb-briefing__badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: #b0402e;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.fb-briefing h2 {
+  margin: 0 0 12px;
+  color: #e8b54a;
+  font-size: 1.1rem;
+}
+
+.fb-briefing p {
+  margin: 0;
+  color: #ede6d2;
+}
+
+/* --- Section headings ------------------------------------------------ */
+
+.fb-main > section > h2 {
+  color: #e8b54a;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #7a2e22;
+  padding-bottom: 8px;
+  margin: 0 0 24px;
+}
+
+/* --- Exhibits ---------------------------------------------------------- */
+
+.fb-exhibit {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px dashed #7a2e22;
+}
+
+.fb-exhibit:last-child {
+  border-bottom: none;
+}
+
+.fb-exhibit__kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #a9843a;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.fb-exhibit h3 {
+  color: #f2ecda;
+  font-size: 1.05rem;
+  margin: 0 0 14px;
+}
+
+.fb-exhibit h4 {
+  color: #e8b54a;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  margin: 18px 0 8px;
+  text-transform: uppercase;
+}
+
+.fb-exhibit p {
+  margin: 0 0 12px;
+  color: #ede6d2;
+}
+
+.fb-exhibit ul {
+  margin: 0 0 12px;
+  padding-left: 1.25em;
+  color: #ede6d2;
+}
+
+.fb-exhibit li {
+  margin-bottom: 6px;
+}
+
+.fb-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #7a2e22;
+  margin-bottom: 16px;
+}
+
+/* --- Journal / resume -------------------------------------------------- */
+
+.fb-subhead {
+  margin: 0 0 12px !important;
+}
+
+.fb-subhead__title {
+  color: #c9c0a8;
+  font-weight: normal;
+  font-size: 0.85em;
+}
+
+.fb-postings {
+  margin: 0 0 12px;
+}
+
+.fb-posting {
+  margin-bottom: 16px;
+}
+
+.fb-posting dt {
+  font-weight: normal;
+  margin-bottom: 4px;
+}
+
+.fb-posting__dates {
+  color: #a9843a;
+  font-size: 0.85rem;
+}
+
+.fb-posting dd {
+  margin: 0;
+  color: #c9c0a8;
+}
+
+/* --- Laptop / projects --------------------------------------------- */
+
+.fb-terminal-line {
+  color: #a9843a;
+  font-size: 0.85rem;
+}
+
+.fb-projects {
+  list-style: none;
+  padding-left: 0;
+}
+
+.fb-projects > li {
+  border: 1px solid #7a2e22;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.fb-project__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fb-project__title {
+  color: #e8b54a;
+  font-weight: bold;
+}
+
+.fb-project__tag {
+  color: #a9843a;
+  font-size: 0.8rem;
+}
+
+.fb-project__highlight {
+  color: #e8b54a;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* --- Contact / phone ------------------------------------------------ */
+
+.fb-contact-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.fb-contact-list li {
+  margin-bottom: 10px;
+}
+
+.fb-contact-label {
+  color: #a9843a;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* --- Board / pinboard ------------------------------------------------ */
+
+.fb-pinboard {
+  list-style: none;
+  padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.fb-pinboard li {
+  border: 1px solid #7a2e22;
+  padding: 12px;
+}
+
+.fb-pinboard h4 {
+  margin: 0 0 6px !important;
+}
+
+.fb-pinboard p {
+  margin: 0;
+  color: #c9c0a8;
+  font-size: 0.85rem;
+}
+
+/* --- Shelf / credentials ---------------------------------------------- */
+
+.fb-skills {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fb-skills li {
+  border: 1px solid #a9843a;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  color: #c9c0a8;
+  margin: 0;
+}
+
+/* --- Photos ---------------------------------------------------------- */
+
+.fb-polaroids {
+  list-style: none;
+  padding-left: 0;
+}
+
+.fb-polaroids li {
+  margin-bottom: 8px;
+}
+
+.fb-polaroid__stamp {
+  color: #b0402e;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* --- Radio ------------------------------------------------------------- */
+
+.fb-transmission {
+  background: #080d0f;
+  border: 1px solid #a9843a;
+  padding: 14px;
+  color: #a9843a;
+  font-size: 0.85rem;
+}
+
+.fb-transmission__glyphs {
+  display: inline-block;
+  margin: 6px 0;
+  letter-spacing: 0.1em;
+}
+
+/* --- Mug ---------------------------------------------------------------- */
+
+.fb-stamp {
+  display: inline-block;
+  border: 2px solid #b0402e;
+  color: #b0402e;
+  padding: 4px 12px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px;
+}
+
+/* --- Identity confirmed / closing ---------------------------------- */
+
+.fb-identity {
+  border: 1px solid #e8b54a;
+  padding: 24px;
+  margin-top: 8px;
+}
+
+.fb-identity__stamp {
+  color: #e8b54a;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.fb-identity p {
+  margin: 0 0 12px;
+}
+
+.fb-identity__actions {
+  margin-top: 16px;
+}
+
+/* --- Links --------------------------------------------------------- */
+
+.fb-link {
+  color: #e8b54a;
+  text-decoration: underline;
+}
+
+.fb-link:hover,
+.fb-link:focus-visible {
+  color: #f7c866;
+}
+
+.fb-link:focus-visible {
+  outline: 2px solid #f7c866;
+  outline-offset: 2px;
+}
+
+.fb-link--button {
+  display: inline-block;
+  text-decoration: none;
+  background: #e8b54a;
+  color: #0b1215;
+  padding: 8px 16px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  border: 1px solid #e8b54a;
+}
+
+.fb-link--button:hover,
+.fb-link--button:focus-visible {
+  background: #f7c866;
+  color: #0b1215;
+}
+
+.fb-link--outline {
+  background: transparent;
+  color: #e8b54a;
+}
+
+.fb-link--outline:hover,
+.fb-link--outline:focus-visible {
+  background: #e8b54a;
+  color: #0b1215;
+}
+
+/* --- Footer ----------------------------------------------------------- */
+
+.fb-footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid #7a2e22;
+  color: #a9843a;
+  font-size: 0.8rem;
+}
+
+.fb-footer p {
+  margin: 0 0 4px;
+}
+
+/* --- Responsive: narrow phones ----------------------------------------- */
+
+@media (max-width: 420px) {
+  .fb-root {
+    padding: 20px 14px 48px;
+  }
+
+  .fb-title {
+    font-size: 1.25rem;
+  }
+
+  .fb-project__head {
+    flex-direction: column;
+  }
+}

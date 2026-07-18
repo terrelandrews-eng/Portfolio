@@ -1,0 +1,577 @@
+/* Exhibit panel chrome — "Case File No. 220" paper look, ported from the
+ * legacy source (legacy/Agent Office Ship.dc.html), specifically the
+ * .ta-panel* rules and the #panelOverlay markup (~lines 150-420).
+ *
+ * Color/z-index come in as CSS custom properties set inline by
+ * ExhibitPanel.tsx from src/theme/tokens.ts — this file stays free of
+ * hard-coded hex so tokens.ts remains the single source of truth.
+ * Animation timings below are a deliberate 1:1 port of the legacy
+ * keyframes/delays and are not theme tokens, so they're literal here.
+ */
+
+@keyframes ta-panel-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ta-panel-fadeup {
+  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.ta-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ta-panel-z, 200);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--ta-panel-backdrop-bg, rgba(11, 18, 21, 0.62));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: ta-panel-fadein 220ms ease;
+  opacity: 1;
+  transition: opacity 180ms ease;
+}
+
+.ta-panel-backdrop.is-closing {
+  opacity: 0;
+}
+
+.ta-panel {
+  position: relative;
+  width: min(680px, 94vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--ta-panel-paper, #f2ecda);
+  color: var(--ta-panel-ink, #080d0f);
+  font-family: var(--ta-panel-font, 'Courier Prime', 'Courier New', monospace);
+  border-radius: 6px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: ta-panel-fadeup 350ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: opacity 180ms ease;
+  opacity: 1;
+}
+
+.ta-panel.is-closing {
+  opacity: 0;
+  animation: none;
+}
+
+.ta-panel__close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 14px 16px 0 0;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 7px 13px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.ta-panel__close:hover,
+.ta-panel__close:focus-visible {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-panel__close:focus-visible {
+  outline: 2px solid var(--ta-panel-amber, #e8b54a);
+  outline-offset: 2px;
+}
+
+.ta-panel__content {
+  padding: 26px 30px 34px;
+}
+
+/* Staggered reveal: kicker -> title -> divider -> body (ported 1:1 from
+ * the legacy `.ta-panel>div>*` nth-child delay table). */
+.ta-panel__content > * {
+  animation: ta-panel-fadeup 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.ta-panel__content > *:nth-child(1) { animation-delay: 0.05s; }
+.ta-panel__content > *:nth-child(2) { animation-delay: 0.13s; }
+.ta-panel__content > *:nth-child(3) { animation-delay: 0.21s; }
+.ta-panel__content > *:nth-child(n+4) { animation-delay: 0.29s; }
+
+.ta-panel__kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  color: var(--ta-panel-stamp, #b0402e);
+  text-transform: uppercase;
+}
+
+.ta-panel__title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.ta-panel__divider {
+  border-bottom: 2px solid var(--ta-panel-ink, #080d0f);
+  margin: 12px 0 18px;
+}
+
+.ta-panel__body {
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.ta-panel__section {
+  display: grid;
+  gap: 4px;
+}
+
+.ta-panel__paragraph {
+  margin: 8px 0;
+}
+
+.ta-panel__heading {
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin: 18px 0 6px;
+  border-bottom: 1px solid rgba(8, 13, 15, 0.3);
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.ta-panel__list {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 4px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.ta-panel__list li {
+  display: flex;
+  gap: 10px;
+}
+
+.ta-panel__list li::before {
+  content: '\25b8';
+  color: var(--ta-panel-stamp, #b0402e);
+  font-weight: 700;
+  flex: none;
+}
+
+.ta-panel__link-button {
+  display: inline-block;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 9px 16px;
+  border-radius: 3px;
+  text-decoration: none;
+  margin: 6px 0 4px;
+}
+
+.ta-panel__link-button:hover {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-panel__image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  margin: 0 0 4px;
+}
+
+/* ---- Portrait / mobile layout (M7.2) --------------------------------
+ * Panels go effectively full-width with small margins and keep their own
+ * internal scroll (overflow-y:auto is already on .ta-panel) so tall content
+ * is never clipped or unreachable on a phone. Desktop rules above unchanged. */
+@media (max-width: 820px) {
+  .ta-panel-backdrop {
+    padding: 12px;
+  }
+
+  .ta-panel {
+    width: 100%;
+    max-height: 92vh;
+  }
+
+  .ta-panel__content {
+    padding: 20px 18px 26px;
+  }
+
+  .ta-panel__title {
+    font-size: 22px;
+  }
+
+  .ta-panel__image {
+    height: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta-panel-backdrop {
+    animation: none;
+  }
+
+  .ta-panel {
+    animation: none;
+  }
+
+  .ta-panel__content > * {
+    animation: none !important;
+  }
+}
+
+/* =======================================================================
+ * M3.2 — per-exhibit renderer rules
+ *
+ * One block per exhibit component (src/ui/panels/*.tsx), each prefixed
+ * with the exhibit's own class namespace (ta-journal-*, ta-laptop-*,
+ * etc). All values below are ported 1:1 from the matching `sc-if` block
+ * in legacy/Agent Office Ship.dc.html (~lines 187-402). Colors that map
+ * to theme/tokens.ts reuse the `--ta-panel-*` custom properties already
+ * threaded in by ExhibitPanel.tsx; colors that only exist in this one
+ * legacy block (terminal green, card paper, etc) are literal hex, same
+ * as the legacy source itself.
+ * ===================================================================== */
+
+/* --- B: Journal (résumé) ------------------------------------------- */
+
+.ta-journal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ta-journal-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.ta-journal-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--ta-panel-stamp, #b0402e);
+  font-weight: 700;
+}
+
+.ta-journal-download {
+  margin: 0;
+  flex: none;
+}
+
+.ta-journal-summary {
+  margin: 16px 0;
+}
+
+.ta-journal-postings {
+  display: grid;
+  gap: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 4px;
+}
+
+.ta-journal-posting__head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ta-journal-posting__dates {
+  color: rgba(8, 13, 15, 0.6);
+}
+
+.ta-journal-posting__desc {
+  margin-top: 4px;
+}
+
+.ta-journal-training {
+  font-size: 13px;
+}
+
+/* --- C: Laptop (terminal / projects) -------------------------------- */
+
+.ta-laptop-terminal {
+  background: #0e1b14;
+  border-radius: 6px;
+  padding: 22px 24px;
+  color: #bfe8c4;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.ta-laptop-terminal__line {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #6fcf7e;
+  margin-bottom: 18px;
+}
+
+.ta-laptop-projects {
+  display: grid;
+  gap: 18px;
+}
+
+.ta-laptop-project {
+  border: 1px solid rgba(111, 207, 126, 0.3);
+  border-radius: 4px;
+  padding: 16px 18px;
+}
+
+.ta-laptop-project__head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.ta-laptop-project__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #eaf6e8;
+}
+
+.ta-laptop-project__tag {
+  font-size: 11px;
+  color: #6fcf7e;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.ta-laptop-project__body {
+  font-size: 12.5px;
+  line-height: 1.7;
+  margin: 8px 0 0;
+  color: rgba(234, 246, 232, 0.85);
+}
+
+.ta-laptop-project__highlight {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ta-panel-amber, #e8b54a);
+  letter-spacing: 1px;
+}
+
+/* --- D: Phone (secure line / contact) ------------------------------- */
+
+.ta-phone-intro {
+  margin: 0 0 22px;
+}
+
+.ta-phone-rows {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.ta-phone-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ta-phone-row--solid {
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-paper, #f2ecda);
+  padding: 16px 20px;
+}
+
+.ta-phone-row--solid:hover,
+.ta-phone-row--solid:focus-visible {
+  background: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-phone-row--outline {
+  border: 2px solid var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-ink, #080d0f);
+  padding: 14px 20px;
+}
+
+.ta-phone-row--outline:hover,
+.ta-phone-row--outline:focus-visible {
+  border-color: var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+}
+
+.ta-phone-row__label {
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.ta-phone-row__value {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+/* --- E: Board (pinboard / tech stack) ------------------------------- */
+
+.ta-board-subheading {
+  font-size: 12.5px;
+  color: rgba(8, 13, 15, 0.65);
+  margin: 8px 0 18px;
+}
+
+.ta-board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.ta-board-card {
+  background: #fbf7ea;
+  border: 1px solid rgba(8, 13, 15, 0.25);
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.ta-board-card:nth-child(4n + 1) { transform: rotate(-0.6deg); }
+.ta-board-card:nth-child(4n + 2) { transform: rotate(0.7deg); }
+.ta-board-card:nth-child(4n + 3) { transform: rotate(0.5deg); }
+.ta-board-card:nth-child(4n + 4) { transform: rotate(-0.8deg); }
+
+.ta-board-card__pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ta-panel-stamp, #b0402e);
+  transform: translateX(-50%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.ta-board-card__heading {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--ta-panel-stamp, #b0402e);
+  margin-bottom: 8px;
+}
+
+.ta-board-card__lines {
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+/* --- F: Shelf (credentials / skills) -------------------------------- */
+
+.ta-shelf-heading--first {
+  margin-top: 0;
+}
+
+.ta-shelf-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ta-shelf-pill {
+  border: 1.5px solid var(--ta-panel-ink, #080d0f);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+/* --- G: Photos (polaroids / field notes) ---------------------------- */
+
+.ta-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.ta-photos-card {
+  background: #fbf7ea;
+  padding: 10px 10px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ta-photos-card:nth-child(4n + 1) { transform: rotate(-1deg); }
+.ta-photos-card:nth-child(4n + 2) { transform: rotate(1deg); }
+.ta-photos-card:nth-child(4n + 3) { transform: rotate(0.6deg); }
+.ta-photos-card:nth-child(4n + 4) { transform: rotate(-0.8deg); }
+
+.ta-photos-card__frame {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(-45deg, #e7e0cc 0 10px, #efe9d8 10px 20px);
+  border: 1px solid rgba(8, 13, 15, 0.2);
+}
+
+.ta-photos-card__stamp {
+  border: 3px double var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 9px;
+  transform: rotate(-6deg);
+}
+
+.ta-photos-card__caption {
+  font-size: 11.5px;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* --- H: Radio (transmission block) ---------------------------------- */
+
+.ta-radio-transmission {
+  display: grid;
+  gap: 2px;
+  background: var(--ta-panel-ink, #080d0f);
+  color: var(--ta-panel-amber, #e8b54a);
+  border-radius: 4px;
+  padding: 18px 20px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+.ta-radio-transmission__glyphs {
+  color: rgba(232, 181, 74, 0.55);
+}
+
+.ta-radio-paragraph {
+  margin: 16px 0 0;
+}
+
+/* --- I: Mug (stamp) --------------------------------------------------- */
+
+.ta-mug-stamp {
+  display: inline-block;
+  border: 4px double var(--ta-panel-stamp, #b0402e);
+  color: var(--ta-panel-stamp, #b0402e);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 10px 18px;
+  transform: rotate(-3deg);
+}
+
+.ta-mug-paragraph {
+  margin: 18px 0 0;
+}
