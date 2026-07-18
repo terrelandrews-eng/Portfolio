@@ -1,7 +1,28 @@
 # HANDOFF — 3D rebuild (paused before cutover)
 
-_Last updated: 2026-07-13. Paused here intentionally, one step short of
+_Last updated: 2026-07-16. Paused here intentionally, one step short of
 going live, to pick up later._
+
+## READ FIRST — design direction changed (2026-07-16)
+
+Do **not** run the M8 cutover as-is. After living with the built 3D site,
+the user does not like the overall feel of it and wants a rethink before
+anything goes live. Specifics, in his words:
+
+- **Loves:** the camera motions and the parallax scroll around the room.
+  Those are the keepers — the core interaction is right.
+- **Dislikes:** the 3D build itself feels clunky and blocky. It misses the
+  mark. The code-modeled room reads as low-fi.
+- **Prefers** the brightness and "realness" of the original 2D build over
+  the new 3D look.
+- **Ideal target:** a hybrid of the two — a **photorealistic background /
+  environment**, kept the **camera movement and room-scroll** interaction
+  on top of it. Not blocky modeled geometry; a real-looking space you move
+  through the same way.
+
+Not being worked on now — this is a note for the next pickup. The M8
+cutover steps below are still accurate mechanically, but the site they'd
+publish is no longer what the user wants shipped. Revisit direction first.
 
 ## Status in one line
 
